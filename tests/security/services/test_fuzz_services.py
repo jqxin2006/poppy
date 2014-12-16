@@ -59,11 +59,11 @@ class TestFuzzCreateService(providers.TestProviderBase):
                                           origin_list=origin_list,
                                           caching_list=caching_list,
                                           flavor_id=flavor_id)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertTrue(resp.status_code<500)
 
-    @attrib.attr('fuzz2')
+    @attrib.attr('fuzz')
     @ddt.file_data('data_fuzz.json')
-    def test_fuzz_create_service2(self, test_data):
+    def test_fuzz_create_service_name(self, test_data):
 
         domain_list = [{"domain": "mywebsite.com"},
                         {"domain": "blog.mywebsite.com"}]
@@ -83,8 +83,216 @@ class TestFuzzCreateService(providers.TestProviderBase):
                                           origin_list=origin_list,
                                           caching_list=caching_list,
                                           flavor_id=flavor_id)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertTrue(resp.status_code<500)
 
+
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service_domain(self, test_data):
+        """
+        fuzz the domain from the domain list 
+        """
+        domain_list = [{"domain": test_data["fuzz_string"]},
+                        {"domain": "blog.mywebsite.com"}]
+        origin_list = [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": False}]
+        caching_list = [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+        self.service_name = str(uuid.uuid1())
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertTrue(resp.status_code<500)
+
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service_origin(self, test_data):
+        """
+        fuzz the origin from the origin list  
+        """
+        domain_list = [{"domain": "blog.mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}]
+        origin_list = [{"origin": test_data["fuzz_string"],
+                         "port": 443,
+                         "ssl": False}]
+        caching_list = [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+        self.service_name = str(uuid.uuid1())
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertTrue(resp.status_code<500)
+
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service_port(self, test_data):
+        """
+        fuzz the port from the orgin list  
+        """
+        domain_list = [{"domain": "blog.mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}]
+        origin_list = [{"origin": "mywebsite1.com",
+                         "port": test_data["fuzz_string"],
+                         "ssl": False}]
+        caching_list = [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+        self.service_name = str(uuid.uuid1())
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertTrue(resp.status_code<500)
+
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service_ssl(self, test_data):
+        """
+        fuzz the ssl from origin list  
+        """
+        domain_list = [{"domain": "blog.mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}]
+        origin_list = [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": test_data["fuzz_string"]}]
+        caching_list = [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+        self.service_name = str(uuid.uuid1())
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertTrue(resp.status_code<500)
+
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service_caching_list_name(self, test_data):
+        """
+        fuzz the name from caching list  
+        """
+        domain_list = [{"domain": "blog.mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}]
+        origin_list = [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": False}]
+        caching_list = [{"name": test_data["fuzz_string"], "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+        self.service_name = str(uuid.uuid1())
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertTrue(resp.status_code<500)
+
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service_caching_list_ttl(self, test_data):
+        """
+        fuzz the ttl from caching list  
+        """
+        domain_list = [{"domain": "blog.mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}]
+        origin_list = [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": False}]
+        caching_list = [{"name": "default", "ttl": test_data["fuzz_string"]},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "index",
+                                     "request_url" : "/index.htm"}]}]
+        self.service_name = str(uuid.uuid1())
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertTrue(resp.status_code<500)
+
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service_caching_list_rules_name(self, test_data):
+        """
+        fuzz the name for rules from caching list  
+        """
+        domain_list = [{"domain": "blog.mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}]
+        origin_list = [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": False}]
+        caching_list = [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : test_data["fuzz_string"],
+                                     "request_url" : "/index.htm"}]}]
+        self.service_name = str(uuid.uuid1())
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertTrue(resp.status_code<500)
+
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service_caching_list_rules_request_url(self, test_data):
+        """
+        fuzz the request_url for rules from caching list  
+        """
+        domain_list = [{"domain": "blog.mywebsite.com"},
+                        {"domain": "blog.mywebsite.com"}]
+        origin_list = [{"origin": "mywebsite1.com",
+                         "port": 443,
+                         "ssl": False}]
+        caching_list = [{"name": "default", "ttl": 3600},
+                         {"name": "home",
+                          "ttl": 1200,
+                          "rules": [{"name" : "default",
+                                     "request_url" : test_data["fuzz_string"]}]}]
+        self.service_name = str(uuid.uuid1())
+        flavor_id = self.flavor_id
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=domain_list,
+                                          origin_list=origin_list,
+                                          caching_list=caching_list,
+                                          flavor_id=flavor_id)
+        self.assertTrue(resp.status_code<500)
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
