@@ -87,7 +87,7 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
                          "port": 443,
                          "ssl": False}]
 
-          for key in caching_list[0]:
+          for key in caching_list[1]:
             self.service_name = str(uuid.uuid1())
             domain_list[0][key] = test_string
             resp = self.client.create_service(service_name=self.service_name,
