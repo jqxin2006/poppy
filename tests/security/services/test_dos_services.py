@@ -132,7 +132,7 @@ class TestDOSCreateService(providers.TestProviderBase):
         for k in range(1, 10):
             self.check_one_request()
 
-    @attrib.attr('security2')
+    @attrib.attr('security')
     def test_dos_create_service_caching_list_rules(self):
         """
         Check whether it is possible to kill the application by
