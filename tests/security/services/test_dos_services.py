@@ -108,10 +108,12 @@ class TestDOSCreateService(providers.TestProviderBase):
         """
         # create a huge list of domain
         self.reset_defaults()
-        for k in range(1, 15000):
-            self.origin_list.append({"origin": "mywebsite.com",
+        for k in range(1, 9000):
+            self.origin_list.append({"origin": "m%s.com" % k,
                                      "port": 443,
-                                     "ssl": False})
+                                     "ssl": False,
+                                     "rules": [{"request_url": "/i.htm",
+                                                "name": "i"}]})
 
         # send 10 requests
         for k in range(1, 10):
@@ -148,7 +150,6 @@ class TestDOSCreateService(providers.TestProviderBase):
         # send 10 requests
         for k in range(1, 10):
             self.check_one_request()
-
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
