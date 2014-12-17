@@ -16,13 +16,9 @@
 # limitations under the License.
 
 import uuid
-
 import ddt
 from nose.plugins import attrib
-
-from tests.api import base
 from tests.api import providers
-from tests.api.utils.schema import services
 
 
 @ddt.ddt
@@ -32,7 +28,19 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
         for creating Service."""
 
     def setUp(self):
+        """
+        Setup for the tests
+        """
         super(TestSecurityBufferOverflowCreateService, self).setUp()
+        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.origin_list = [{"origin": "mywebsite1.com",
+                             "port": 443,
+                             "ssl": False}]
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home",
+                              "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_config.default_flavor
 
@@ -45,76 +53,83 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
                                           "links": [{"href": "www.fastly.com",
                                                      "rel": "provider_url"}]}])
 
+    def reset_defaults(self):
+        """
+        Reset domain_list, origin_list, caching_list, service_name
+        and flavor_id to its default value.
+        """
+        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.origin_list = [{"origin": "mywebsite1.com",
+                             "port": 443,
+                             "ssl": False}]
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home",
+                              "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
+        self.service_name = str(uuid.uuid1())
+        self.flavor_id = self.test_config.default_flavor
+
+    def check_one_request(self):
+        """
+        Check the response of one request to see whether the application
+        is vulnerable to buffer overflow.
+        """
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
+        # delete the service
+        self.assertTrue(resp.status_code < 503)
+        self.client.delete_service(service_name=self.service_name)
+
     @attrib.attr('security')
-    def test_security_bufferoverflow_create_service(self):
-
-        domain_list = [{"domain": "mywebsite.com"}]
-        origin_list = [{"origin": "mywebsite1.com",
-                         "port": 443,
-                         "ssl": False}]
-        caching_list = [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
-        
-        flavor_id = self.flavor_id
-
-        for k in range(100000, 1500000, 100000):
-          test_string = "A"*k
-
-          for key in domain_list[0]:
+    @ddt.file_data('bufferoverflow.json')
+    def test_security_bufferoverflow_create_service(self, test_data):
+        """
+        Check whether the application is vulnerable to buffer overflow.
+        """
+        test_string = "A" * test_data["buffer_length"]
+        #check domain list values
+        for key in self.domain_list[0]:
             self.service_name = str(uuid.uuid1())
-            domain_list[0][key] = test_string
-            resp = self.client.create_service(service_name=self.service_name,
-                                          domain_list=domain_list,
-                                          origin_list=origin_list,
-                                          caching_list=caching_list,
-                                          flavor_id=flavor_id)
-            self.assertTrue(resp.status_code<503)
-          domain_list = [{"domain": "mywebsite.com"}]
-
-          for key in origin_list[0]:
+            self.domain_list[0][key] = test_string
+            self.check_one_request()
+            self.reset_defaults()
+        #check origin list values
+        for key in self.origin_list[0]:
             self.service_name = str(uuid.uuid1())
-            domain_list[0][key] = test_string
-            resp = self.client.create_service(service_name=self.service_name,
-                                          domain_list=domain_list,
-                                          origin_list=origin_list,
-                                          caching_list=caching_list,
-                                          flavor_id=flavor_id)
-            self.assertTrue(resp.status_code<503)
-          origin_list = [{"origin": "mywebsite1.com",
-                         "port": 443,
-                         "ssl": False}]
-
-          for key in caching_list[1]:
+            self.origin_list[0][key] = test_string
+            self.check_one_request()
+            self.reset_defaults()
+        #check the caching list values
+        for key in self.caching_list[1]:
             self.service_name = str(uuid.uuid1())
-            domain_list[0][key] = test_string
-            resp = self.client.create_service(service_name=self.service_name,
-                                          domain_list=domain_list,
-                                          origin_list=origin_list,
-                                          caching_list=caching_list,
-                                          flavor_id=flavor_id)
-            self.assertTrue(resp.status_code<503)
-          caching_list = [{"name": "default", "ttl": 3600},
-                         {"name": "home",
-                          "ttl": 1200,
-                          "rules": [{"name" : "index",
-                                     "request_url" : "/index.htm"}]}]
-        
-          self.service_name = test_string
-          resp = self.client.create_service(service_name=self.service_name,
-                                          domain_list=domain_list,
-                                          origin_list=origin_list,
-                                          caching_list=caching_list,
-                                          flavor_id=flavor_id)
-          self.assertTrue(resp.status_code<503)
+            # to do. This is currently tied with existing examples.
+            if isinstance(self.caching_list[1][key], (list)):
+                for the_key in self.caching_list[1][key][0]:
+                    self.caching_list[1][key][0][the_key] = test_string
+                    self.check_one_request()
+                    self.reset_defaults()
+            else:
+                self.caching_list[1][key] = test_string
+                self.check_one_request()
+                self.reset_defaults()
+        #check the service name
+        self.service_name = test_string
+        self.check_one_request()
+        self.reset_defaults()
 
-          self.service_name = str(uuid.uuid1())
-          resp = self.client.create_service(service_name=self.service_name,
-                                          domain_list=domain_list,
-                                          origin_list=origin_list,
-                                          caching_list=caching_list,
-                                          flavor_id=test_string)
-          self.assertTrue(resp.status_code<503)
+        #check the flavor_id
+        self.flavor_id = test_string
+        self.check_one_request()
+        self.reset_defaults()
 
+    def tearDown(self):
+        self.client.delete_service(service_name=self.service_name)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
+        super(TestSecurityBufferOverflowCreateService, self).tearDown()

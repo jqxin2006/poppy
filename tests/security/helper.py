@@ -1,3 +1,4 @@
+import sys
 request='''{
         "name": "my_service_name",
         "domain_list": [{"domain": "mywebsite.com"},
@@ -11,6 +12,13 @@ request='''{
                           "rules": [{"name" : "index",
                                      "request_url" : "/index.htm"}]}]
     }'''
+
+print  "{"
+for k in range(100000, 1500000, 100000):
+  print "\"buffer_length%s\":{\"buffer_length\":%s}," % (k,k)
+print "}"
+
+sys.exit(-1)
 
 with open("fuzz1.txt") as f:
     lines = f.readlines()
