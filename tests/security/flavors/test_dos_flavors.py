@@ -32,14 +32,7 @@ class TestDOSCreateFlavor(providers.TestProviderBase):
         Setup for the tests
         """
         super(TestDOSCreateFlavor, self).setUp()
-        self.provider_list = [{"provider": "fastly",
-                               "links": [{"href": "www.watermelon.com",
-                                          "rel": "provider_url"}]}]
-        self.limits_list = [{"origins": {"min": 1, "max": 5}},
-                            {"domains": {"min": 1, "max": 5}},
-                            {"caching": {"min": 3600,
-                                         "max": 604800, "incr": 300}}]
-        self.flavor_id = str(uuid.uuid1())
+        self.reset_defaults()
 
     def reset_defaults(self):
         """
@@ -100,7 +93,7 @@ class TestDOSCreateFlavor(providers.TestProviderBase):
         for k in range(1, 10):
             self.check_one_request()
 
-    @attrib.attr('security2')
+    @attrib.attr('security')
     def test_dos_create_flavor_limits_list(self):
         """
         Check whether it is possible to kill the application by

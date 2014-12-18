@@ -35,14 +35,7 @@ class TestXSSCreateFlavor(providers.TestProviderBase):
 
     def setUp(self):
         super(TestXSSCreateFlavor, self).setUp()
-        self.provider_list = [{"provider": "fastly",
-                               "links": [{"href": "www.watermelon.com",
-                                          "rel": "provider_url"}]}]
-        self.limits_list = [{"origins": {"min": 1, "max": 5}},
-                            {"domains": {"min": 1, "max": 5}},
-                            {"caching": {"min": 3600,
-                                         "max": 604800, "incr": 300}}]
-        self.flavor_id = str(uuid.uuid1())
+        self.reset_defaults()
 
     def reset_defaults(self):
         """
