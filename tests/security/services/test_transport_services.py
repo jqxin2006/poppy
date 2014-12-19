@@ -17,21 +17,22 @@
 
 import uuid
 import ddt
+import re
 from nose.plugins import attrib
 from tests.api import providers
 
 
 @ddt.ddt
-class TestDOSCreateService(providers.TestProviderBase):
+class TestTransportService(providers.TestProviderBase):
 
-    """Security Tests for Denail of Service vulnerablities
-        for creating Service."""
+    """Security Tests for transport layer security vulnerablities
+        for service calls."""
 
     def setUp(self):
         """
         Setup for the tests
         """
-        super(TestDOSCreateService, self).setUp()
+        super(TestTransportService, self).setUp()
         self.domain_list = [{"domain": "mywebsite.com"}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
@@ -73,90 +74,29 @@ class TestDOSCreateService(providers.TestProviderBase):
 
     def check_one_request(self):
         """
-        Check the response of one request to see whether one request can
-        kill the application.
+        Create one service and check whether it has been
+        sucessfully created.
         """
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=self.domain_list,
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
-        # delete the service
-        self.assertTrue(resp.status_code < 503)
-
-        self.client.delete_service(service_name=self.service_name)
+        self.assertTrue(resp.status_code == 202)
 
     @attrib.attr('security')
-    def test_dos_create_service_domain_list(self):
+    def test_transport_check_https(self):
         """
-        Check whether it is possible to kill the application by
-        creating a service with huge list of domains.
+        Check whether https is used for all links returned from get_service
+        calls. If https is not used in any link, the test fails.
         """
-        # create a huge list of domain
         self.reset_defaults()
-        for k in range(1, 30000):
-            self.domain_list.append({"domain": "w.t%s.com" % k})
-
-        # send MAX_ATTEMPTS requests
-        for k in range(1, self.MAX_ATTEMPTS):
-            self.service_name = str(uuid.uuid1())
-            self.check_one_request()
-
-    @attrib.attr('security')
-    def test_dos_create_service_origin_list(self):
-        """
-        Check whether it is possible to kill the application by
-        creating a service with huge list of origins.
-        """
-        # create a huge list of domain
-        self.reset_defaults()
-        for k in range(1, 9000):
-            self.origin_list.append({"origin": "m%s.com" % k,
-                                     "port": 443,
-                                     "ssl": False,
-                                     "rules": [{"request_url": "/i.htm",
-                                                "name": "i"}]})
-
-        # send MAX_ATTEMPTS requests
-        for k in range(1, self.MAX_ATTEMPTS):
-            self.service_name = str(uuid.uuid1())
-            self.check_one_request()
-
-    @attrib.attr('security')
-    def test_dos_create_service_caching_list(self):
-        """
-        Check whether it is possible to kill the application by
-        creating a service with huge list of caching.
-        """
-        # create a huge list of domain
-        self.reset_defaults()
-        for k in range(1, 16000):
-            self.caching_list.append({"name": "d%s" % k, "ttl": 3600,
-                                      "rules": [{"request_url": "/i.htm",
-                                                "name": "i"}]})
-
-        # send MAX_ATTEMPTS requests
-        for k in range(1, self.MAX_ATTEMPTS):
-            self.service_name = str(uuid.uuid1())
-            self.check_one_request()
-
-    @attrib.attr('security')
-    def test_dos_create_service_caching_list_rules(self):
-        """
-        Check whether it is possible to kill the application by
-        creating a service with huge list rules within caching list.
-        """
-        # create a huge list of domain
-        self.reset_defaults()
-        for k in range(1, 15000):
-            self.caching_list[1]["rules"].append(
-                {"name": "i%s" % k,
-                 "request_url": "/index.htm"})
-
-        # send MAX_ATTEMPTS requests
-        for k in range(1, self.MAX_ATTEMPTS):
-            self.service_name = str(uuid.uuid1())
-            self.check_one_request()
+        self.service_name = str(uuid.uuid1())
+        # create one service
+        self.check_one_request()
+        resp = self.client.list_services()
+        # make sure that http:// is not used anywhere
+        self.assertTrue(re.search("http://", resp.text) is None)
 
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
@@ -164,4 +104,4 @@ class TestDOSCreateService(providers.TestProviderBase):
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
 
-        super(TestDOSCreateService, self).tearDown()
+        super(TestTransportService, self).tearDown()
