@@ -35,7 +35,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.flavor_id = str(uuid.uuid1())
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_flavor_id(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -51,7 +51,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_provider(self, test_data):
 
         provider_list = [{"provider": test_data['fuzz_string'],
@@ -66,7 +66,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_href(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -81,7 +81,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_rel(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -96,7 +96,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_origins_min(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -111,7 +111,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_origins_max(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -126,7 +126,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_domains_min(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -141,7 +141,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_domains_max(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -156,7 +156,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_caching_min(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -171,7 +171,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_caching_max(self, test_data):
 
         provider_list = [{"provider": "fastly",
@@ -186,7 +186,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         self.assertNotEqual(resp.status_code, 500)
     
     @attrib.attr('fuzz')
-    @ddt.file_data('data_fuzz.json')
+    @ddt.file_data('../services/data_fuzz.json')
     def test_fuzz_caching_incr(self, test_data):
 
         provider_list = [{"provider": "fastly",
