@@ -22,7 +22,7 @@ from tests.api import providers
 
 
 @ddt.ddt
-class TestXSSCreateService(providers.TestProviderBase):
+class TestSQLInjCreateService(providers.TestProviderBase):
 
     """Security Tests for SQL Injection input in all fields of Create Service."""
 
@@ -30,7 +30,7 @@ class TestXSSCreateService(providers.TestProviderBase):
         """
         Setup for the tests
         """
-        super(TestXSSCreateService, self).setUp()
+        super(TestSQLInjCreateService, self).setUp()
         self.domain_list = [{"domain": "mywebsite.com"}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
@@ -94,7 +94,7 @@ class TestXSSCreateService(providers.TestProviderBase):
     @ddt.file_data('data_sql_inj.json')
     def test_fuzz_create_service_domain_list(self, test_data):
         """
-        Check whether it is possible to inject XSS in the application
+        Check whether it is possible to inject SQL in the application
         in the domain key.
         """
         # inject SQL from data file into domain value
@@ -108,7 +108,7 @@ class TestXSSCreateService(providers.TestProviderBase):
     @ddt.file_data('data_sql_inj.json')
     def test_fuzz_create_service_origin_list(self, test_data):
         """
-        Check whether it is possible to inject XSS in the application
+        Check whether it is possible to inject SQL in the application
         in the origin key.
         """
         # inject SQL from data file into origin value
@@ -126,7 +126,7 @@ class TestXSSCreateService(providers.TestProviderBase):
     @ddt.file_data('data_sql_inj.json')
     def test_fuzz_create_service_caching_list(self, test_data):
         """
-        Check whether it is possible to inject XSS in the application
+        Check whether it is possible to inject SQL in the application
         in the caching key.
         """
         # inject SQL from data file into caching values
@@ -143,7 +143,7 @@ class TestXSSCreateService(providers.TestProviderBase):
     @ddt.file_data('data_sql_inj.json')
     def test_fuzz_create_service_caching_list_rules(self, test_data):
         """
-        Check whether it is possible to inject XSS in the application
+        Check whether it is possible to inject SQL in the application
         in the caching rules key.
         """
         # inject SQL from data file into caching rules values
@@ -160,4 +160,68 @@ class TestXSSCreateService(providers.TestProviderBase):
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
 
-        super(TestXSSCreateService, self).tearDown()
+        super(TestSQLInjCreateService, self).tearDown()
+
+@ddt.ddt
+class TestSQLInjListServices(base.TestBase):
+    """Tests for List Services."""
+
+    def _create_test_service(self):
+        service_name = str(uuid.uuid1())
+
+        self.domain_list = [{"domain": str(uuid.uuid1()) + '.com'}]
+
+        self.origin_list = [{"origin": str(uuid.uuid1()) + '.com',
+                             "port": 443, "ssl": False}]
+
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home", "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
+
+        self.client.create_service(service_name=service_name,
+                                   domain_list=self.domain_list,
+                                   origin_list=self.origin_list,
+                                   caching_list=self.caching_list,
+                                   flavor_id=self.flavor_id)
+        return service_name
+
+    def setUp(self):
+        super(TestSQLInjListServices, self).setUp()
+        self.service_list = []
+        if self.test_config.generate_flavors:
+            self.flavor_id = str(uuid.uuid1())
+            self.client.create_flavor(
+                flavor_id=self.flavor_id,
+                provider_list=[{"provider": "fastly",
+                                "links": [{"href": "www.fastly.com",
+                                           "rel": "provider_url"}]}])
+        else:
+            self.flavor_id = self.test_config.default_flavor
+
+    @attrib.attr('sql_inj')
+    @ddt.file_data('data_sql_inj.json')
+    def test_list_services_sql_inj_limits(self, test_data):
+        """
+        Test whether is possible to inject SQL in limit parameter
+        """
+        url_param = {'limit': test_data['sql_inj_string']}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 400)
+
+    @attrib.attr('sql_inj')
+    @ddt.file_data('data_sql_inj.json')
+    def test_list_services_sql_inj_marker(self, test_data):
+        url_param = {'marker': test_data['sql_inj_string']}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 200)
+
+    def tearDown(self):
+        for service in self.service_list:
+            self.client.delete_service(service_name=service)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
+        super(TestSQLInjListServices, self).tearDown()
+

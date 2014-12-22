@@ -162,3 +162,68 @@ class TestXSSCreateService(providers.TestProviderBase):
             self.client.delete_flavor(flavor_id=self.flavor_id)
 
         super(TestXSSCreateService, self).tearDown()
+
+
+@ddt.ddt
+class TestXSSListServices(base.TestBase):
+    """Tests for List Services."""
+
+    def _create_test_service(self):
+        service_name = str(uuid.uuid1())
+
+        self.domain_list = [{"domain": str(uuid.uuid1()) + '.com'}]
+
+        self.origin_list = [{"origin": str(uuid.uuid1()) + '.com',
+                             "port": 443, "ssl": False}]
+
+        self.caching_list = [{"name": "default", "ttl": 3600},
+                             {"name": "home", "ttl": 1200,
+                              "rules": [{"name": "index",
+                                         "request_url": "/index.htm"}]}]
+
+        self.client.create_service(service_name=service_name,
+                                   domain_list=self.domain_list,
+                                   origin_list=self.origin_list,
+                                   caching_list=self.caching_list,
+                                   flavor_id=self.flavor_id)
+        return service_name
+
+    def setUp(self):
+        super(TestXSSListServices, self).setUp()
+        self.service_list = []
+        if self.test_config.generate_flavors:
+            self.flavor_id = str(uuid.uuid1())
+            self.client.create_flavor(
+                flavor_id=self.flavor_id,
+                provider_list=[{"provider": "fastly",
+                                "links": [{"href": "www.fastly.com",
+                                           "rel": "provider_url"}]}])
+        else:
+            self.flavor_id = self.test_config.default_flavor
+
+    @attrib.attr('xss')
+    @ddt.file_data('data_xss.json')
+    def test_list_services_xss_limits(self, test_data):
+        """
+        Test whether is possible to inject XSS in limit parameter
+        """
+        url_param = {'limit': test_data['xss_string']}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 400)
+
+    @attrib.attr('xss')
+    @ddt.file_data('data_xss.json')
+    def test_list_services_xss_marker(self, test_data):
+        url_param = {'marker': test_data['xss_string']}
+        resp = self.client.list_services(param=url_param)
+        self.assertEqual(resp.status_code, 200)
+
+    def tearDown(self):
+        for service in self.service_list:
+            self.client.delete_service(service_name=service)
+
+        if self.test_config.generate_flavors:
+            self.client.delete_flavor(flavor_id=self.flavor_id)
+
+        super(TestXSSListServices, self).tearDown()
+
