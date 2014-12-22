@@ -33,6 +33,7 @@ class TestDOSCreateFlavor(providers.TestProviderBase):
         """
         super(TestDOSCreateFlavor, self).setUp()
         self.reset_defaults()
+        self.MAX_ATTEMPTS = 30
 
     def reset_defaults(self):
         """
@@ -73,7 +74,7 @@ class TestDOSCreateFlavor(providers.TestProviderBase):
             self.provider_list.append({"provider": "w.t%s.com" % k})
 
         # send 10 requests
-        for k in range(1, 10):
+        for k in range(1, self.MAX_ATTEMPTS):
             self.check_one_request()
 
     @attrib.attr('security')
@@ -90,7 +91,7 @@ class TestDOSCreateFlavor(providers.TestProviderBase):
                  "rel": "/index.htm"})
 
         # send 10 requests
-        for k in range(1, 10):
+        for k in range(1, self.MAX_ATTEMPTS):
             self.check_one_request()
 
     @attrib.attr('security')
@@ -108,7 +109,7 @@ class TestDOSCreateFlavor(providers.TestProviderBase):
             self.limits_list.append({"origins": {"min": "%s" % k, "max": 5}})
 
         # send 10 requests
-        for k in range(1, 10):
+        for k in range(1, self.MAX_ATTEMPTS):
             self.check_one_request()
 
     def tearDown(self):
