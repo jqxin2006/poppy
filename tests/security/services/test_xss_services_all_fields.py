@@ -18,6 +18,7 @@
 import uuid
 import ddt
 from nose.plugins import attrib
+from tests.api import base
 from tests.api import providers
 
 
