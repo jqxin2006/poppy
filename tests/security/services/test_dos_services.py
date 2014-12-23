@@ -158,6 +158,30 @@ class TestDOSCreateService(providers.TestProviderBase):
             self.service_name = str(uuid.uuid1())
             self.check_one_request()
 
+    @attrib.attr('security')
+    def test_dos_list_service_huge_limit(self):
+        """
+        Check whether it is possible to kill the application by
+        listing all services with a huge limit
+        """
+        # create a huge list of domain
+        attack_string = "1" * 3500
+        params = {"limit": attack_string, "marker": attack_string}
+        resp = self.client.list_services(param=params)
+        self.assertTrue(resp.status_code < 503)
+
+    @attrib.attr('security')
+    def test_dos_list_service_huge_junk(self):
+        """
+        Check whether it is possible to kill the application by
+        listing all services with a huge junk parameter
+        """
+        # create a huge list of domain
+        attack_string = "1" * 3500
+        params = {"junk": attack_string}
+        resp = self.client.list_services(param=params)
+        self.assertTrue(resp.status_code < 503)
+
     def tearDown(self):
         self.client.delete_service(service_name=self.service_name)
 
