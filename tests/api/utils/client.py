@@ -107,7 +107,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('PATCH', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_service(self, location=None, service_name=None):
+    def get_service(self, location=None, service_name=None,
+                    requestslib_kwargs=None):
         """Get Service
 
         :return: Response Object containing response code 200 and body with
@@ -120,9 +121,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
             url = location
         else:
             url = '{0}/services/{1}'.format(self.url, service_name)
-        return self.request('GET', url)
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
 
-    def list_services(self, param=None):
+    def list_services(self, param=None, requestslib_kwargs=None):
         """Get a list of Services
 
         :return: Response Object containing response code 200 and body with
@@ -132,9 +133,10 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/services'.format(self.url)
-        return self.request('GET', url, params=param)
+        return self.request('GET', url, params=param,
+                            requestslib_kwargs=requestslib_kwargs)
 
-    def delete_service(self, service_name):
+    def delete_service(self, service_name, requestslib_kwargs=None):
         """Delete Service
 
         :return: Response Object containing response code 204
@@ -143,9 +145,10 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/services/{1}'.format(self.url, service_name)
-        return self.request('DELETE', url)
+        return self.request('DELETE', url,
+                            requestslib_kwargs=requestslib_kwargs)
 
-    def check_health(self):
+    def check_health(self, requestslib_kwargs=None):
         """Check Health of the application
 
         :return: Response Object containing response code 204
@@ -154,9 +157,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/health'.format(self.url)
-        return self.request('GET', url)
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
 
-    def ping(self):
+    def ping(self, requestslib_kwargs=None):
         """Ping the server
 
         :return: Response Object containing response code 204
@@ -165,7 +168,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/ping'.format(self.url)
-        return self.request('GET', url)
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
 
     def create_flavor(self, flavor_id=None, provider_list=None, limits=None,
                       requestslib_kwargs=None):
@@ -185,7 +188,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                             request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_flavor(self, flavor_location=None, flavor_id=None):
+    def get_flavor(self, flavor_location=None, flavor_id=None,
+                   requestslib_kwargs=None):
         """Get Flavor
 
         :return: Response Object containing response code 200 and body with
@@ -198,9 +202,10 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         else:
             url = '{0}/flavors/{1}'.format(self.url, flavor_id)
 
-        return self.request('GET', url)
+        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
 
-    def delete_flavor(self, flavor_location=None, flavor_id=None):
+    def delete_flavor(self, flavor_location=None, flavor_id=None,
+                      requestslib_kwargs=None):
         """Delete Flavor
 
         :return: Response Object containing response code 204
@@ -212,7 +217,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         else:
             url = u'{0}/flavors/{1}'.format(self.url, flavor_id)
 
-        return self.request('DELETE', url)
+        return self.request('DELETE', url,
+                            requestslib_kwargs=requestslib_kwargs)
 
     def wait_for_service_status(self, service_name, status, retry_interval=2,
                                 retry_timeout=30):
