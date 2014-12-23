@@ -17,6 +17,8 @@
 
 import uuid
 import ddt
+import gzip
+import StringIO
 from nose.plugins import attrib
 from tests.api import providers
 
@@ -41,6 +43,17 @@ class TestDOSCreateService(providers.TestProviderBase):
                               "ttl": 1200,
                               "rules": [{"name": "index",
                                          "request_url": "/index.htm"}]}]
+        self.restrictions_list = [
+            {
+                u"name": u"website only",
+                u"rules": [
+                    {
+                        u"name": "mywebsite.com",
+                        u"referrer": "mywebsite.com"
+                    }
+                ]
+            }
+        ]
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_config.default_flavor
         self.MAX_ATTEMPTS = 30
@@ -71,6 +84,39 @@ class TestDOSCreateService(providers.TestProviderBase):
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_config.default_flavor
 
+    def create_invalid_json(self, length):
+        """
+        Create invalid_json like [[[[[[[[[[[[[test]]]]]]]]]]]]]
+        """
+        str = ""
+        str += "[" * length
+        str += "\"test\""
+        str += "]" * length
+        return str
+
+    def create_malicious_json(self, length):
+        """
+        Create malicious json like {{{{t:{{{{{}}}}}}}}}
+        """
+        str = "{"
+        for k in range(0, length):
+            str += "\"t%s\":{" % k
+        str += "\"t\":\"t\""
+        for k in range(0, length):
+            str += "}"
+        str += "}"
+        return str
+
+    def data_zip(self, data):
+        """
+        zip the data using gzip format
+        """
+        stringio = StringIO.StringIO()
+        gzip_file = gzip.GzipFile(fileobj=stringio, mode='wb')
+        gzip_file.write(data)
+        gzip_file.close()
+        return stringio.getvalue()
+
     def check_one_request(self):
         """
         Check the response of one request to see whether one request can
@@ -85,6 +131,123 @@ class TestDOSCreateService(providers.TestProviderBase):
         self.assertTrue(resp.status_code < 503)
 
         self.client.delete_service(service_name=self.service_name)
+
+    @attrib.attr('security')
+    def test_invalid_json_create_service(self):
+        """
+        Check whether it is possible to kill the application by
+        creating a big invalid json blob.
+        """
+        # create a payload with invalid json blob
+        attack_string = self.create_invalid_json(2500)
+        kwargs = {"data": attack_string}
+        print kwargs
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id,
+                                          requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code < 503)
+
+    @attrib.attr('security')
+    def test_malicious_json_create_service(self):
+        """
+        Check whether it is possible to kill the application by
+        creating a big malicious json blob.
+        """
+        # create a payload with malicous json blob
+        attack_string = self.create_malicious_json(900)
+        headers = {"X-Auth-Token": self.client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers, "data": attack_string}
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id,
+                                          requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code < 503)
+
+    @attrib.attr('security')
+    def test_malicious_json_utf_8_create_service(self):
+        """
+        Check whether it is possible to kill the application by
+        creating a big malicious json blob with utf-8 encoding.
+        """
+        # create a payload with malicous json blob
+        attack_string = self.create_malicious_json(800)
+        headers = {"X-Auth-Token": self.client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers, "data": attack_string.encode("utf-8")}
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id,
+                                          requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code < 503)
+
+    @attrib.attr('security')
+    def test_create_service_with_big_project_id(self):
+        """
+        Check whether it is possible to kill the application by
+        creating service with big X-Project-Id header.
+        """
+        for k in range(1, 100, 1):
+            self.reset_defaults()
+            headers = {"X-Auth-Token": self.client.auth_token,
+                       "X-Project-Id": "1"*k}
+            kwargs = {"headers": headers}
+            self.service_name = str(uuid.uuid1())
+            resp = self.client.create_service(service_name=self.service_name,
+                                              domain_list=self.domain_list,
+                                              origin_list=self.origin_list,
+                                              caching_list=self.caching_list,
+                                              flavor_id=self.flavor_id,
+                                              requestslib_kwargs=kwargs)
+            self.assertTrue(resp.status_code < 503)
+            resp = self.client.get_service(service_name=self.service_name)
+            self.assertTrue(resp.status_code < 503)
+
+    @attrib.attr('security')
+    def test_malicious_json_utf_16_create_service(self):
+        """
+        Check whether it is possible to kill the application by
+        creating a big malicious json blob with utf-16 encoding.
+        """
+        # create a payload with malicous json blob
+        attack_string = self.create_malicious_json(400)
+        headers = {"X-Auth-Token": self.client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers, "data": attack_string.encode("utf-16")}
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id,
+                                          requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code < 503)
+
+    @attrib.attr('security')
+    def test_malicious_json_gzip_create_service(self):
+        """
+        Check whether it is possible to kill the application by
+        creating a big malicious json blob with gzip.
+        """
+        # create a payload with malicous json blob
+        attack_string = self.create_malicious_json(2500)
+        headers = {"X-Auth-Token": self.client.auth_token,
+                   "X-Project-Id": self.client.project_id,
+                   "Content-Encoding": "gzip"}
+        kwargs = {"headers": headers, "data": self.data_zip(attack_string)}
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id,
+                                          requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code < 503)
 
     @attrib.attr('security')
     def test_dos_create_service_domain_list(self):
@@ -183,8 +346,6 @@ class TestDOSCreateService(providers.TestProviderBase):
         self.assertTrue(resp.status_code < 503)
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
-
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
 

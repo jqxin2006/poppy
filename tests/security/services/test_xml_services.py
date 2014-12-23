@@ -77,7 +77,7 @@ class TestXMLService(providers.TestProviderBase):
         Check whether it is possible to kill the application by
         creating a service using XML bomb.
         """
-        # replace the token with another user's token
+        # replace content type with application/xml
         headers = {"X-Auth-Token": self.client.auth_token,
                    "X-Project-Id": self.client.project_id,
                    "Content-Type": "application/xml"}
