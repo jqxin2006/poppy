@@ -106,6 +106,39 @@ class TestAuthorizationService(providers.TestProviderBase):
         self.assertTrue(resp.status_code == 401)
 
     @attrib.attr('security')
+    def test_authorization_create_service_other_user_token(self):
+        """
+        Check whether it is possible to create a servcie with a
+        valid token from another user.
+        """
+        # replace the token with another user's token
+        headers = {"X-Auth-Token": self.alt_user_client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers}
+
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id,
+                                          requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code == 401)
+
+    @attrib.attr('security')
+    def test_authorization_list_services_other_user_token(self):
+        """
+        Check whether it is possible to list services with a
+        valid token from another user.
+        """
+        # replace the token with another user's token
+        headers = {"X-Auth-Token": self.alt_user_client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers}
+
+        resp = self.client.list_services(requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code == 401)
+
+    @attrib.attr('security')
     def test_authorization_list_service_no_token(self):
         """
         Check whether it is possible to list all services with no token.
@@ -115,6 +148,32 @@ class TestAuthorizationService(providers.TestProviderBase):
         kwargs = {"headers": headers}
         resp = self.client.list_services(requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
+
+    @attrib.attr('security')
+    def test_authorization_get_service_other_user_token(self):
+        """
+        Check whether it is possible to get one service with a
+        valid token from another user.
+        """
+        # replace the token with another user's token
+        headers = {"X-Auth-Token": self.alt_user_client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers}
+
+        self.reset_defaults()
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertTrue(resp.status_code == 200)
+
+        resp = self.client.get_service(service_name=self.service_name,
+                                       requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code == 401)
+        self.client.delete_service(service_name=self.service_name)
 
     @attrib.attr('security')
     def test_authorization_get_service_no_token(self):
@@ -150,6 +209,32 @@ class TestAuthorizationService(providers.TestProviderBase):
         kwargs = {"headers": headers}
         self.reset_defaults()
 
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertTrue(resp.status_code == 200)
+
+        resp = self.client.delete_service(service_name=self.service_name,
+                                          requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code == 401)
+        self.client.delete_service(service_name=self.service_name)
+
+    @attrib.attr('security')
+    def test_authorization_delete_service_other_user_token(self):
+        """
+        Check whether it is possible to delete one service with a
+        valid token from another user.
+        """
+        # replace the token with another user's token
+        headers = {"X-Auth-Token": self.alt_user_client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers}
+
+        self.reset_defaults()
         resp = self.client.create_service(service_name=self.service_name,
                                           domain_list=self.domain_list,
                                           origin_list=self.origin_list,
@@ -266,6 +351,40 @@ class TestAuthorizationService(providers.TestProviderBase):
                                          request_body=request_body,
                                          requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
+        self.client.delete_service(service_name=self.service_name)
+
+    @attrib.attr('security')
+    def test_authorization_patch_service_other_user_token(self):
+        """
+        Check whether it is possible to patch one service with a
+        valid token from another user.
+        """
+        # replace the token with another user's token
+        headers = {"X-Auth-Token": self.alt_user_client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers}
+
+        self.reset_defaults()
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+        resp = self.client.get_service(service_name=self.service_name)
+        self.assertTrue(resp.status_code == 200)
+        request_body = json.loads(
+            CreateService(service_name=self.service_name,
+                          domain_list=self.domain_list,
+                          origin_list=self.origin_list,
+                          caching_list=self.caching_list,
+                          flavor_id=self.flavor_id)._obj_to_json())
+
+        resp = self.client.patch_service(service_name=self.service_name,
+                                         request_body=request_body,
+                                         requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code == 401)
+        self.client.delete_service(service_name=self.service_name)
 
     @attrib.attr('security')
     def test_authorization_patch_service_no_token(self):
