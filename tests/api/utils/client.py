@@ -223,6 +223,18 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('DELETE', url,
                             requestslib_kwargs=requestslib_kwargs)
 
+    def purge_assets(self, service_name, param=None, requestslib_kwargs=None):
+        """Purge Assets
+
+        :return: Response Object containing response code 204
+        DELETE
+        /services/{service_name}/assets​?{url,​all}
+        """
+        url = u'{0}/services/{1}/assets'.format(self.url, service_name)
+
+        return self.request('DELETE', url, params=param,
+                            requestslib_kwargs=requestslib_kwargs)
+
     def wait_for_service_status(self, service_name, status, retry_interval=2,
                                 retry_timeout=30):
         """Waits for a service to reach a given status."""
