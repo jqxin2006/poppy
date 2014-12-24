@@ -41,6 +41,17 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
                               "ttl": 1200,
                               "rules": [{"name": "index",
                                          "request_url": "/index.htm"}]}]
+        self.restrictions_list = [
+            {
+                u"name": u"website only",
+                u"rules": [
+                    {
+                        u"name": "mywebsite.com",
+                        u"referrer": "mywebsite.com"
+                    }
+                ]
+            }
+        ]
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_config.default_flavor
 
@@ -69,17 +80,30 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
                                          "request_url": "/index.htm"}]}]
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_config.default_flavor
+        self.restrictions_list = [
+            {
+                u"name": u"website only",
+                u"rules": [
+                    {
+                        u"name": "mywebsite.com",
+                        u"referrer": "mywebsite.com"
+                    }
+                ]
+            }
+        ]
 
     def check_one_request(self):
         """
         Check the response of one request to see whether the application
         is vulnerable to buffer overflow.
         """
-        resp = self.client.create_service(service_name=self.service_name,
-                                          domain_list=self.domain_list,
-                                          origin_list=self.origin_list,
-                                          caching_list=self.caching_list,
-                                          flavor_id=self.flavor_id)
+        resp = self.client.create_service(
+            service_name=self.service_name,
+            domain_list=self.domain_list,
+            origin_list=self.origin_list,
+            caching_list=self.caching_list,
+            restrictions_list=self.restrictions_list,
+            flavor_id=self.flavor_id)
         # delete the service
         self.assertTrue(resp.status_code < 503)
         self.client.delete_service(service_name=self.service_name)
@@ -116,6 +140,20 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
                 self.caching_list[1][key] = test_string
                 self.check_one_request()
                 self.reset_defaults()
+        # check the restriction list values
+        for key in self.restrictions_list[0]:
+            self.service_name = str(uuid.uuid1())
+            # to do. This is currently tied with existing examples.
+            if isinstance(self.restrictions_list[0][key], (list)):
+                for the_key in self.restrictions_list[0][key][0]:
+                    self.restrictions_list[0][key][0][the_key] = test_string
+                    self.check_one_request()
+                    self.reset_defaults()
+            else:
+                self.restrictions_list[0][key] = test_string
+                self.check_one_request()
+                self.reset_defaults()
+
         #check the service name
         self.service_name = test_string
         self.check_one_request()

@@ -195,7 +195,7 @@ class TestDOSCreateService(providers.TestProviderBase):
         creating service with big X-Project-Id header.
         """
         failed_count = 0
-        for k in range(2500, 15000, 500):
+        for k in range(2500, 8000, 500):
             self.reset_defaults()
             headers = {"X-Auth-Token": self.client.auth_token,
                        "X-Project-Id": "1"*k,
