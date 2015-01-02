@@ -13,14 +13,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import json
+import logging
+import os
+
+from oslo.config import cfg
+
+from poppy import bootstrap
 from poppy.model.helpers import provider_details
 from poppy.openstack.common import log
+from poppy.transport.pecan.models.request import service
 
-LOG = log.getLogger(__name__)
+LOG = log.getLogger(__file__)
+conf = cfg.CONF
+conf(project='poppy', prog='poppy', args=[])
 
 
-def update_worker(service_controller, project_id, service_name,
+def update_worker(project_id, service_id,
                   service_old, service_updates, service_obj):
+    LOG.logger.setLevel(logging.INFO)
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+    service_controller = bootstrap_obj.manager.services_controller
+
+    service_old = service.load_from_json(json.loads(service_old))
+    service_updates = service.load_from_json(json.loads(service_updates))
+    service_obj = service.load_from_json(json.loads(service_obj))
+
     responders = []
     # update service with each provider present in provider_details
     for provider in service_old.provider_details:
@@ -40,7 +59,22 @@ def update_worker(service_controller, project_id, service_name,
     provider_details_dict = {}
     for responder in responders:
         for provider_name in responder:
-            if 'error' not in responder[provider_name]:
+            if 'error' in responder[provider_name]:
+                provider_details_dict[provider_name] = (
+                    provider_details.ProviderDetail(
+                        status='failed',
+                        error_message=responder[provider_name]['error'],
+                        error_info=responder[provider_name]['error_detail']))
+            elif 'error' in dns_responder[provider_name]:
+                error_msg = dns_responder[provider_name]['error']
+                error_info = dns_responder[provider_name]['error_detail']
+
+                provider_details_dict[provider_name] = (
+                    provider_details.ProviderDetail(
+                        error_info=error_info,
+                        status='failed',
+                        error_message=error_msg))
+            else:
                 access_urls = dns_responder[provider_name]['access_urls']
                 provider_details_dict[provider_name] = (
                     provider_details.ProviderDetail(
@@ -52,18 +86,38 @@ def update_worker(service_controller, project_id, service_name,
                 else:
                     provider_details_dict[provider_name].status = (
                         'deployed')
-            else:
-                provider_details_dict[provider_name] = (
-                    provider_details.ProviderDetail(
-                        status='failed',
-                        error_message=responder[provider_name]['error'],
-                        error_info=responder[provider_name]['error_detail']))
 
     # update the service object
-    service_controller.storage_controller.update(project_id, service_name,
+    service_controller.storage_controller.update(project_id, service_id,
                                                  service_obj)
     # update the provider details
     service_controller.storage_controller.update_provider_details(
         project_id,
-        service_name,
+        service_id,
         provider_details_dict)
+
+    service_controller.storage_controller._driver.close_connection()
+    LOG.info('Update service worker process %s complete...' %
+             str(os.getpid()))
+
+
+if __name__ == '__main__':
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+
+    parser = argparse.ArgumentParser(description='Delete service async worker'
+                                     ' script arg parser')
+
+    parser.add_argument('project_id', action="store")
+    parser.add_argument('service_id', action="store")
+    parser.add_argument('service_old', action="store")
+    parser.add_argument('service_updates', action="store")
+    parser.add_argument('service_obj', action="store")
+
+    result = parser.parse_args()
+    project_id = result.project_id
+    service_id = result.service_id
+    service_old = result.service_old
+    service_updates = result.service_updates
+    service_obj = result.service_obj
+    update_worker(project_id, service_id, service_old, service_updates,
+                  service_obj)

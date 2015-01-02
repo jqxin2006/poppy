@@ -127,10 +127,16 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
         # delete the service
         self.assertTrue(resp.status_code < 503)
 
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_invalid_json_create_service(self):
@@ -148,6 +154,9 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id,
                                           requestslib_kwargs=kwargs)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        
         self.assertTrue(resp.status_code < 503)
 
     @attrib.attr('security')
@@ -167,6 +176,9 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id,
                                           requestslib_kwargs=kwargs)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+
         self.assertTrue(resp.status_code < 503)
 
     @attrib.attr('security')
@@ -186,9 +198,12 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id,
                                           requestslib_kwargs=kwargs)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+
         self.assertTrue(resp.status_code < 503)
 
-    @attrib.attr('security2')
+    @attrib.attr('security')
     def test_create_service_with_big_project_id(self):
         """
         Check whether it is possible to kill the application by
@@ -208,6 +223,9 @@ class TestDOSCreateService(providers.TestProviderBase):
                                               caching_list=self.caching_list,
                                               flavor_id=self.flavor_id,
                                               requestslib_kwargs=kwargs)
+            if 'location' in resp.headers:
+                self.service_url = resp.headers['location']
+            
             #self.assertTrue(resp.status_code < 503)
             if (resp.status_code == 503):
                 failed_count += 1
@@ -234,6 +252,9 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id,
                                           requestslib_kwargs=kwargs)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+
         self.assertTrue(resp.status_code < 503)
 
     @attrib.attr('security')
@@ -254,6 +275,9 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id,
                                           requestslib_kwargs=kwargs)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+
         self.assertTrue(resp.status_code < 503)
 
     @attrib.attr('security')

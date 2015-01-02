@@ -111,7 +111,6 @@ class TestXMLService(providers.TestProviderBase):
         self.assertTrue(match is not None)
 
     def tearDown(self):
-
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
 

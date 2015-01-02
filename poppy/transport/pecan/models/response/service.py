@@ -30,9 +30,10 @@ class Model(collections.OrderedDict):
 
     'Service Response Model.'
 
-    def __init__(self, service_obj, request):
+    def __init__(self, service_obj, controller):
         super(Model, self).__init__()
         self["name"] = service_obj.name
+        self["id"] = str(service_obj.service_id)
         self["domains"] = [domain.Model(d) for d in service_obj.domains]
         self["origins"] = [origin.Model(o) for o in service_obj.origins]
         self["restrictions"] = [restriction.Model(r) for r in
@@ -44,19 +45,17 @@ class Model(collections.OrderedDict):
 
         self["errors"] = []
 
-        # TODO(tonytan4ever) : add access_url links.
-        # This has things to do with provider_detail change. (CDN-172)
         self["links"] = [
             link.Model(
                 str(
-                    uri.encode(u'{0}/v1.0/services/{1}'.format(
-                        request.host_url,
-                        self['name']))),
+                    uri.encode(u'{0}/services/{1}'.format(
+                        controller.base_url,
+                        service_obj.service_id))),
                 'self'),
             link.Model(
                 str(
-                    uri.encode(u'{0}/v1.0/flavors/{1}'.format(
-                        request.host_url,
+                    uri.encode(u'{0}/flavors/{1}'.format(
+                        controller.base_url,
                         service_obj.flavor_id))),
                 'flavor')]
 

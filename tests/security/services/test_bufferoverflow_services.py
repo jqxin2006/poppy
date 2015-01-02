@@ -104,9 +104,13 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
             caching_list=self.caching_list,
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+
         # delete the service
         self.assertTrue(resp.status_code < 503)
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     @ddt.file_data('bufferoverflow.json')
@@ -165,7 +169,8 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
         self.reset_defaults()
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)

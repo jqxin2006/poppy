@@ -81,12 +81,16 @@ class TestSecuritySQLInjCreateService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+
         # to do: change this to something reasonable once the environment is stable
         # see Flavor SQL Inj script
         #self.assertEqual(resp.status_code, 202)
         self.assertTrue(resp.status_code > 200)
         # delete the service
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     @ddt.file_data('data_sql_inj.json')
@@ -136,7 +140,8 @@ class TestSecuritySQLInjCreateService(providers.TestProviderBase):
             self.reset_defaults()
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
@@ -199,7 +204,8 @@ class TestSecuritySQLInjListServices(base.TestBase):
 
     def tearDown(self):
         for service in self.service_list:
-            self.client.delete_service(service_name=service)
+            if self.service_url != '':
+                self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
