@@ -34,7 +34,7 @@ class TestAuthorizationService(providers.TestProviderBase):
         Setup for the tests
         """
         super(TestAuthorizationService, self).setUp()
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -61,7 +61,7 @@ class TestAuthorizationService(providers.TestProviderBase):
         Reset domain_list, origin_list, caching_list, service_name
         and flavor_id to its default value.
         """
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -166,6 +166,7 @@ class TestAuthorizationService(providers.TestProviderBase):
         # create header without token
         headers = {"X-Auth-Token": ""}
         kwargs = {"headers": headers}
+        
         resp = self.client.list_services(requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
 
@@ -186,16 +187,18 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.get_service(location=self.service_url)
+        resp = self.client.get_service(location=self.service_url,
+                                        requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
         if self.service_url != '':
             self.client.delete_service(location=self.service_url)
@@ -215,16 +218,18 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.get_service(location=self.service_url)
+        resp = self.client.get_service(location=self.service_url,
+                                        requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
         if self.service_url != '':
             self.client.delete_service(location=self.service_url)
@@ -244,12 +249,13 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
@@ -277,12 +283,13 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
@@ -308,12 +315,13 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
@@ -340,17 +348,20 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.get_service(location=self.service_url)
+        resp = self.client.get_service(location=self.service_url,
+                                        requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
+        
         if self.service_url != '':
             self.client.delete_service(location=self.service_url)
 
@@ -401,12 +412,13 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         request_body = json.loads(
             CreateService(service_name=self.service_name,
                           domain_list=self.domain_list,
@@ -438,12 +450,13 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
         request_body = json.loads(
@@ -473,12 +486,13 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
         else:
             self.service_url = ''
 
-        self.assertTrue(resp.status_code == 202)
         request_body = json.loads(
             CreateService(service_name=self.service_name,
                           domain_list=self.domain_list,
