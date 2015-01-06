@@ -104,17 +104,23 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
             caching_list=self.caching_list,
             restrictions_list=self.restrictions_list,
             flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
         # delete the service
         self.assertTrue(resp.status_code < 503)
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
-    @attrib.attr('security')
+    @attrib.attr('security9')
     @ddt.file_data('bufferoverflow.json')
     def test_security_bufferoverflow_create_service(self, test_data):
         """
         Check whether the application is vulnerable to buffer overflow.
         """
-        test_string = "A" * test_data["buffer_length"]
+        test_string = "A" * 10000 #test_data["buffer_length"]
         #check domain list values
         for key in self.domain_list[0]:
             self.service_name = str(uuid.uuid1())
@@ -165,7 +171,8 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
         self.reset_defaults()
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)

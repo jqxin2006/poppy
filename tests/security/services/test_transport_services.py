@@ -82,6 +82,9 @@ class TestTransportService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+
         self.assertTrue(resp.status_code == 202)
 
     @attrib.attr('security')
@@ -99,7 +102,8 @@ class TestTransportService(providers.TestProviderBase):
         self.assertTrue(re.search("http://", resp.text) is None)
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)

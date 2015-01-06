@@ -34,7 +34,7 @@ class TestAuthorizationService(providers.TestProviderBase):
         Setup for the tests
         """
         super(TestAuthorizationService, self).setUp()
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -61,7 +61,7 @@ class TestAuthorizationService(providers.TestProviderBase):
         Reset domain_list, origin_list, caching_list, service_name
         and flavor_id to its default value.
         """
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -83,10 +83,16 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
         # delete the service
         self.assertTrue(resp.status_code < 503)
 
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_create_service_no_token(self):
@@ -103,6 +109,11 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id,
                                           requestslib_kwargs=kwargs)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
         self.assertTrue(resp.status_code == 401)
 
     @attrib.attr('security')
@@ -122,6 +133,11 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id,
                                           requestslib_kwargs=kwargs)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
         self.assertTrue(resp.status_code == 401)
 
     @attrib.attr('security')
@@ -130,6 +146,8 @@ class TestAuthorizationService(providers.TestProviderBase):
         Check whether it is possible to list services with a
         valid token from another user.
         """
+        self.service_url = ''
+        
         # replace the token with another user's token
         headers = {"X-Auth-Token": self.alt_user_client.auth_token,
                    "X-Project-Id": self.client.project_id}
@@ -143,9 +161,12 @@ class TestAuthorizationService(providers.TestProviderBase):
         """
         Check whether it is possible to list all services with no token.
         """
+        self.service_url = ''
+
         # create header without token
         headers = {"X-Auth-Token": ""}
         kwargs = {"headers": headers}
+        
         resp = self.client.list_services(requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
 
@@ -167,13 +188,20 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
-        resp = self.client.get_service(service_name=self.service_name)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.get_service(service_name=self.service_name,
-                                       requestslib_kwargs=kwargs)
+        resp = self.client.get_service(location=self.service_url,
+                                        requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_get_service_no_token(self):
@@ -191,13 +219,20 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
-        resp = self.client.get_service(service_name=self.service_name)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.get_service(service_name=self.service_name,
-                                       requestslib_kwargs=kwargs)
+        resp = self.client.get_service(location=self.service_url,
+                                        requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_delete_service_no_token(self):
@@ -215,13 +250,21 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
-        resp = self.client.get_service(service_name=self.service_name)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.delete_service(service_name=self.service_name,
-                                          requestslib_kwargs=kwargs)
+        if self.service_url != '':
+            resp = self.client.delete_service(location=self.service_url,
+                                                requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_delete_service_other_user_token(self):
@@ -241,13 +284,21 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
-        resp = self.client.get_service(service_name=self.service_name)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.delete_service(service_name=self.service_name,
-                                          requestslib_kwargs=kwargs)
+        if self.service_url != '':
+            resp = self.client.delete_service(location=self.service_url,
+                                                requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_delete_service_invalid_token(self):
@@ -265,14 +316,22 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
-        resp = self.client.get_service(service_name=self.service_name)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.delete_service(service_name=self.service_name,
-                                          requestslib_kwargs=kwargs)
+        if self.service_url != '':
+            resp = self.client.delete_service(location=self.service_url,
+                                                requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
 
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_get_service_invalid_token(self):
@@ -290,19 +349,29 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
-        resp = self.client.get_service(service_name=self.service_name)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
 
-        resp = self.client.get_service(service_name=self.service_name,
-                                       requestslib_kwargs=kwargs)
+        resp = self.client.get_service(location=self.service_url,
+                                        requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
-        self.client.delete_service(service_name=self.service_name)
+        
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_list_service_invalid_token(self):
         """
         Check whether it is possible to list all services with invlid token.
         """
+        self.service_url = ''
+
         # create header without token
         headers = {"X-Auth-Token": "1"*1000}
         kwargs = {"headers": headers}
@@ -323,6 +392,11 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id,
                                           requestslib_kwargs=kwargs)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
         self.assertTrue(resp.status_code == 401)
 
     @attrib.attr('security')
@@ -339,19 +413,25 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
         request_body = json.loads(
             CreateService(service_name=self.service_name,
                           domain_list=self.domain_list,
                           origin_list=self.origin_list,
                           caching_list=self.caching_list,
                           flavor_id=self.flavor_id)._obj_to_json())
-        resp = self.client.get_service(service_name=self.service_name)
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
-        resp = self.client.patch_service(service_name=self.service_name,
+        resp = self.client.patch_service(location=self.service_url,
                                          request_body=request_body,
                                          requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
-        self.client.delete_service(service_name=self.service_name)
+        self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_patch_service_other_user_token(self):
@@ -371,7 +451,13 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
-        resp = self.client.get_service(service_name=self.service_name)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
         request_body = json.loads(
             CreateService(service_name=self.service_name,
@@ -380,11 +466,11 @@ class TestAuthorizationService(providers.TestProviderBase):
                           caching_list=self.caching_list,
                           flavor_id=self.flavor_id)._obj_to_json())
 
-        resp = self.client.patch_service(service_name=self.service_name,
+        resp = self.client.patch_service(location=self.service_url,
                                          request_body=request_body,
                                          requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
-        self.client.delete_service(service_name=self.service_name)
+        self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     def test_authorization_patch_service_no_token(self):
@@ -401,21 +487,28 @@ class TestAuthorizationService(providers.TestProviderBase):
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
         self.assertTrue(resp.status_code == 202)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
         request_body = json.loads(
             CreateService(service_name=self.service_name,
                           domain_list=self.domain_list,
                           origin_list=self.origin_list,
                           caching_list=self.caching_list,
                           flavor_id=self.flavor_id)._obj_to_json())
-        resp = self.client.get_service(service_name=self.service_name)
+        resp = self.client.get_service(location=self.service_url)
         self.assertTrue(resp.status_code == 200)
-        resp = self.client.patch_service(service_name=self.service_name,
+        resp = self.client.patch_service(location=self.service_url,
                                          request_body=request_body,
                                          requestslib_kwargs=kwargs)
         self.assertTrue(resp.status_code == 401)
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)

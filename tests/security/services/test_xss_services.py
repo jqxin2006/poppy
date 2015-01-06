@@ -81,13 +81,18 @@ class TestSecurityXSSCreateService(providers.TestProviderBase):
                                           origin_list=self.origin_list,
                                           caching_list=self.caching_list,
                                           flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
         
         # to do: change this to something reasonable once the environment is stable
         # see Flavor XSS script
         #self.assertEqual(resp.status_code, 202)
         self.assertTrue(resp.status_code > 200)
         # delete the service
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
     @ddt.file_data('data_xss.json')
@@ -137,7 +142,8 @@ class TestSecurityXSSCreateService(providers.TestProviderBase):
             self.reset_defaults()
 
     def tearDown(self):
-        self.client.delete_service(service_name=self.service_name)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)
@@ -161,11 +167,15 @@ class TestXSSListServices(base.TestBase):
                               "rules": [{"name": "index",
                                          "request_url": "/index.htm"}]}]
 
-        self.client.create_service(service_name=service_name,
+        resp = self.client.create_service(service_name=service_name,
                                    domain_list=self.domain_list,
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
                                    flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
         return service_name
 
     def setUp(self):
@@ -181,7 +191,7 @@ class TestXSSListServices(base.TestBase):
         else:
             self.flavor_id = self.test_config.default_flavor
 
-    @attrib.attr('xss')
+    @attrib.attr('security')
     @ddt.file_data('data_xss.json')
     def test_list_services_xss_limits(self, test_data):
         """
@@ -191,16 +201,17 @@ class TestXSSListServices(base.TestBase):
         resp = self.client.list_services(param=url_param)
         self.assertEqual(resp.status_code, 400)
 
-    @attrib.attr('xss')
+    @attrib.attr('security')
     @ddt.file_data('data_xss.json')
     def test_list_services_xss_marker(self, test_data):
         url_param = {'marker': test_data['xss_string']}
         resp = self.client.list_services(param=url_param)
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
         for service in self.service_list:
-            self.client.delete_service(service_name=service)
+            if self.service_url != '':
+                self.client.delete_service(location=self.service_url)
 
         if self.test_config.generate_flavors:
             self.client.delete_flavor(flavor_id=self.flavor_id)

@@ -48,7 +48,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -63,7 +63,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -78,7 +78,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -93,7 +93,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -108,7 +108,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -123,7 +123,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -138,7 +138,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -153,7 +153,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -168,7 +168,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -183,7 +183,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
     
     @attrib.attr('fuzz')
     @ddt.file_data('../services/data_fuzz.json')
@@ -198,7 +198,7 @@ class TestFuzzCreateFlavor(providers.TestProviderBase):
         resp = self.client.create_flavor(flavor_id=self.flavor_id,
                                           provider_list=provider_list,
                                           limits=limits)
-        self.assertNotEqual(resp.status_code, 500)
+        self.assertLess(resp.status_code, 500)
 
     def tearDown(self):
         self.client.delete_flavor(flavor_id=self.flavor_id)

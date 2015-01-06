@@ -13,17 +13,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import json
+import logging
+import os
+
+from oslo.config import cfg
+
+from poppy import bootstrap
 from poppy.openstack.common import log
+from poppy.transport.pecan.models.request import (
+    provider_details as req_provider_details
+)
 
-LOG = log.getLogger(__name__)
+LOG = log.getLogger(__file__)
+conf = cfg.CONF
+conf(project='poppy', prog='poppy', args=[])
 
 
-def service_delete_worker(provider_details, service_controller,
-                          project_id, service_name):
+def service_delete_worker(provider_details,
+                          project_id, service_id):
+    LOG.logger.setLevel(logging.INFO)
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+    service_controller = bootstrap_obj.manager.services_controller
+    provider_details = json.loads(provider_details)
+
     responders = []
     # try to delete all service from each provider presented
     # in provider_details
     for provider in provider_details:
+        provider_details[provider] = (
+            req_provider_details.load_from_json(provider_details[provider]))
         LOG.info('Starting to delete service from %s' % provider)
         responder = service_controller.provider_wrapper.delete(
             service_controller._driver.providers[provider.lower()],
@@ -40,14 +60,14 @@ def service_delete_worker(provider_details, service_controller,
         if 'error' in responder[provider_name]:
             LOG.info('Delete service from %s failed' % provider_name)
             LOG.info('Updating provider detail status of %s for %s' %
-                     (provider_name, service_name))
+                     (provider_name, service_id))
             # stores the error info for debugging purposes.
             provider_details[provider_name].error_info = (
                 responder[provider_name].get('error_info'))
         elif 'error' in dns_responder[provider_name]:
             LOG.info('Delete service from DNS failed')
             LOG.info('Updating provider detail status of %s for %s'.format(
-                     (provider_name, service_name)))
+                     (provider_name, service_id)))
             # stores the error info for debugging purposes.
             provider_details[provider_name].error_info = (
                 dns_responder[provider_name].get('error_info'))
@@ -62,15 +82,35 @@ def service_delete_worker(provider_details, service_controller,
         # action, maybe for debug and/or support.
         LOG.info('Delete failed for one or more providers'
                  'Updating poppy service provider details for %s' %
-                 service_name)
+                 service_id)
         service_controller.storage_controller.update_provider_details(
             project_id,
-            service_name,
+            service_id,
             provider_details)
 
     # always delete from Poppy.  Provider Details will contain
     # any provider issues that may have occurred.
     LOG.info('Deleting poppy service %s from all providers successful'
-             % service_name)
-    service_controller.storage_controller.delete(project_id, service_name)
-    LOG.info('Deleting poppy service %s succeeded' % service_name)
+             % service_id)
+    service_controller.storage_controller.delete(project_id, service_id)
+    service_controller.storage_controller._driver.close_connection()
+    LOG.info('Deleting poppy service %s succeeded' % service_id)
+    LOG.info('Delete service worker process %s complete...' %
+             str(os.getpid()))
+
+
+if __name__ == '__main__':
+    bootstrap_obj = bootstrap.Bootstrap(conf)
+
+    parser = argparse.ArgumentParser(description='Delete service async worker'
+                                     ' script arg parser')
+
+    parser.add_argument('provider_details', action="store")
+    parser.add_argument('project_id', action="store")
+    parser.add_argument('service_id', action="store")
+
+    result = parser.parse_args()
+    provider_details = result.provider_details
+    project_id = result.project_id
+    service_id = result.service_id
+    service_delete_worker(provider_details, project_id, service_id)

@@ -97,7 +97,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('POST', url, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def patch_service(self, service_name=None, request_body=None,
+    def patch_service(self, location, request_body=None,
                       requestslib_kwargs=None):
         """Updates Service
 
@@ -105,26 +105,20 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         PATCH
         services/{service_name}
         """
-        url = '{0}/services/{1}'.format(self.url, service_name)
         request_object = requests.PatchService(request_body=request_body)
-        return self.request('PATCH', url, request_entity=request_object,
+        return self.request('PATCH', location, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_service(self, location=None, service_name=None,
-                    requestslib_kwargs=None):
+    def get_service(self, location=None, requestslib_kwargs=None):
         """Get Service
 
         :return: Response Object containing response code 200 and body with
         details of service
         GET
-        services/{service_name}
+        services/{service_id}
         """
-
-        if location:
-            url = location
-        else:
-            url = '{0}/services/{1}'.format(self.url, service_name)
-        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+        return self.request('GET', location,
+                            requestslib_kwargs=requestslib_kwargs)
 
     def list_services(self, param=None, requestslib_kwargs=None):
         """Get a list of Services
@@ -139,19 +133,18 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('GET', url, params=param,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def delete_service(self, service_name, requestslib_kwargs=None):
+    def delete_service(self, location, requestslib_kwargs=None):
         """Delete Service
 
         :return: Response Object containing response code 204
         DELETE
-        services/{service_name}
+        services/{service_id}
         """
 
-        url = '{0}/services/{1}'.format(self.url, service_name)
-        return self.request('DELETE', url,
+        return self.request('DELETE', location,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def check_health(self, requestslib_kwargs=None):
+    def check_health(self):
         """Check Health of the application
 
         :return: Response Object containing response code 204
@@ -160,9 +153,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/health'.format(self.url)
-        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+        return self.request('GET', url)
 
-    def ping(self, requestslib_kwargs=None):
+    def ping(self):
         """Ping the server
 
         :return: Response Object containing response code 204
@@ -171,7 +164,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         """
 
         url = '{0}/ping'.format(self.url)
-        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+        return self.request('GET', url)
 
     def create_flavor(self, flavor_id=None, provider_list=None, limits=None,
                       requestslib_kwargs=None):
@@ -191,8 +184,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
                             request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_flavor(self, flavor_location=None, flavor_id=None,
-                   requestslib_kwargs=None):
+    def get_flavor(self, flavor_location=None, flavor_id=None):
         """Get Flavor
 
         :return: Response Object containing response code 200 and body with
@@ -205,10 +197,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         else:
             url = '{0}/flavors/{1}'.format(self.url, flavor_id)
 
-        return self.request('GET', url, requestslib_kwargs=requestslib_kwargs)
+        return self.request('GET', url)
 
-    def delete_flavor(self, flavor_location=None, flavor_id=None,
-                      requestslib_kwargs=None):
+    def delete_flavor(self, flavor_location=None, flavor_id=None):
         """Delete Flavor
 
         :return: Response Object containing response code 204
@@ -220,22 +211,9 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         else:
             url = u'{0}/flavors/{1}'.format(self.url, flavor_id)
 
-        return self.request('DELETE', url,
-                            requestslib_kwargs=requestslib_kwargs)
+        return self.request('DELETE', url)
 
-    def purge_assets(self, service_name, param=None, requestslib_kwargs=None):
-        """Purge Assets
-
-        :return: Response Object containing response code 204
-        DELETE
-        /services/{service_name}/assets​?{url,​all}
-        """
-        url = u'{0}/services/{1}/assets'.format(self.url, service_name)
-
-        return self.request('DELETE', url, params=param,
-                            requestslib_kwargs=requestslib_kwargs)
-
-    def wait_for_service_status(self, service_name, status, retry_interval=2,
+    def wait_for_service_status(self, location, status, retry_interval=2,
                                 retry_timeout=30):
         """Waits for a service to reach a given status."""
         current_status = ''
@@ -243,7 +221,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         stop_time = start_time + retry_timeout
         while current_status != status:
             time.sleep(retry_interval)
-            service = self.get_service(service_name=service_name)
+            service = self.get_service(location=location)
             body = service.json()
             current_status = body['status']
             if (current_status == status):
