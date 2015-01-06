@@ -32,7 +32,7 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
         Setup for the tests
         """
         super(TestSecurityBufferOverflowCreateService, self).setUp()
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -69,7 +69,7 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
         Reset domain_list, origin_list, caching_list, service_name
         and flavor_id to its default value.
         """
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -114,7 +114,7 @@ class TestSecurityBufferOverflowCreateService(providers.TestProviderBase):
         if self.service_url != '':
             self.client.delete_service(location=self.service_url)
 
-    @attrib.attr('security9')
+    @attrib.attr('security')
     @ddt.file_data('bufferoverflow.json')
     def test_security_bufferoverflow_create_service(self, test_data):
         """
