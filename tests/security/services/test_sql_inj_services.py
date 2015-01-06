@@ -83,6 +83,8 @@ class TestSecuritySQLInjCreateService(providers.TestProviderBase):
                                           flavor_id=self.flavor_id)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
 
         # to do: change this to something reasonable once the environment is stable
         # see Flavor SQL Inj script
@@ -170,6 +172,10 @@ class TestSecuritySQLInjListServices(base.TestBase):
                                    origin_list=self.origin_list,
                                    caching_list=self.caching_list,
                                    flavor_id=self.flavor_id)
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
         return service_name
 
     def setUp(self):
@@ -200,7 +206,7 @@ class TestSecuritySQLInjListServices(base.TestBase):
     def test_list_services_sql_inj_marker(self, test_data):
         url_param = {'marker': test_data['sql_inj_string']}
         resp = self.client.list_services(param=url_param)
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 400)
 
     def tearDown(self):
         for service in self.service_list:
