@@ -105,6 +105,8 @@ class TestFuzzService(providers.TestProviderBase):
             flavor_id=self.flavor_id)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
         
         # delete the service
         self.assertTrue(resp.status_code < 500)
