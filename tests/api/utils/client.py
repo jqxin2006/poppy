@@ -109,7 +109,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('PATCH', location, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-    def get_service(self, location=None):
+    def get_service(self, location=None, requestslib_kwargs=None):
         """Get Service
 
         :return: Response Object containing response code 200 and body with
@@ -117,7 +117,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         GET
         services/{service_id}
         """
-        return self.request('GET', location)
+        return self.request('GET', location,
+                            requestslib_kwargs=requestslib_kwargs)
 
     def list_services(self, param=None, requestslib_kwargs=None):
         """Get a list of Services
