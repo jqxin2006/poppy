@@ -33,7 +33,7 @@ class TestTransportService(providers.TestProviderBase):
         Setup for the tests
         """
         super(TestTransportService, self).setUp()
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -60,7 +60,7 @@ class TestTransportService(providers.TestProviderBase):
         Reset domain_list, origin_list, caching_list, service_name
         and flavor_id to its default value.
         """
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -84,6 +84,8 @@ class TestTransportService(providers.TestProviderBase):
                                           flavor_id=self.flavor_id)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
 
         self.assertTrue(resp.status_code == 202)
 

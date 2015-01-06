@@ -34,7 +34,7 @@ class TestDOSCreateService(providers.TestProviderBase):
         Setup for the tests
         """
         super(TestDOSCreateService, self).setUp()
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -72,7 +72,7 @@ class TestDOSCreateService(providers.TestProviderBase):
         Reset domain_list, origin_list, caching_list, service_name
         and flavor_id to its default value.
         """
-        self.domain_list = [{"domain": "mywebsite.com"}]
+        self.domain_list = [{"domain": "mywebsite%s.com" % uuid.uuid1()}]
         self.origin_list = [{"origin": "mywebsite1.com",
                              "port": 443,
                              "ssl": False}]
@@ -156,6 +156,8 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           requestslib_kwargs=kwargs)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
         
         self.assertTrue(resp.status_code < 503)
 
@@ -178,6 +180,8 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           requestslib_kwargs=kwargs)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
 
         self.assertTrue(resp.status_code < 503)
 
@@ -200,6 +204,8 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           requestslib_kwargs=kwargs)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
 
         self.assertTrue(resp.status_code < 503)
 
@@ -225,7 +231,9 @@ class TestDOSCreateService(providers.TestProviderBase):
                                               requestslib_kwargs=kwargs)
             if 'location' in resp.headers:
                 self.service_url = resp.headers['location']
-            
+            else:
+                self.service_url = ''
+        
             #self.assertTrue(resp.status_code < 503)
             if (resp.status_code == 503):
                 failed_count += 1
@@ -254,6 +262,8 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           requestslib_kwargs=kwargs)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
 
         self.assertTrue(resp.status_code < 503)
 
@@ -263,7 +273,7 @@ class TestDOSCreateService(providers.TestProviderBase):
         Check whether it is possible to kill the application by
         creating a big malicious json blob with gzip.
         """
-        # create a payload with malicous json blob
+        # create a payload with malicious json blob
         attack_string = self.create_malicious_json(2500)
         headers = {"X-Auth-Token": self.client.auth_token,
                    "X-Project-Id": self.client.project_id,
@@ -277,6 +287,8 @@ class TestDOSCreateService(providers.TestProviderBase):
                                           requestslib_kwargs=kwargs)
         if 'location' in resp.headers:
             self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
 
         self.assertTrue(resp.status_code < 503)
 
