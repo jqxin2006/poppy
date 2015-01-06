@@ -94,7 +94,7 @@ class TestFuzzService(providers.TestProviderBase):
     def check_one_request(self):
         """
         Check the response of one request to see whether the application
-        is vulnerable to buffer overflow.
+        generates any 500 errors.
         """
         resp = self.client.create_service(
             service_name=self.service_name,
@@ -107,13 +107,13 @@ class TestFuzzService(providers.TestProviderBase):
         self.assertTrue(resp.status_code < 500)
         self.client.delete_service(service_name=self.service_name)
 
-    @attrib.attr('security')
-    @ddt.file_data('bufferoverflow.json')
-    def test_security_bufferoverflow_create_service(self, test_data):
+    @attrib.attr('fuzz')
+    @ddt.file_data('data_fuzz.json')
+    def test_fuzz_create_service(self, test_data):
         """
-        Check whether the application is vulnerable to buffer overflow.
+        Fuzz the create service calls to see whether 500 errors are generated.
         """
-        test_string = "A" * test_data["buffer_length"]
+        test_string = test_data["fuzz_string"]
         #check domain list values
         for key in self.domain_list[0]:
             self.service_name = str(uuid.uuid1())
