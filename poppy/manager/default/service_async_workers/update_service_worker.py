@@ -28,19 +28,15 @@ from poppy.transport.pecan.models.request import service
 LOG = log.getLogger(__file__)
 conf = cfg.CONF
 conf(project='poppy', prog='poppy', args=[])
-
-
 def update_worker(project_id, service_id,
-                  service_old, service_obj):
+                  service_old, service_updates, service_obj):
     LOG.logger.setLevel(logging.INFO)
     bootstrap_obj = bootstrap.Bootstrap(conf)
     service_controller = bootstrap_obj.manager.services_controller
 
-    service_old_json = json.loads(service_old)
-    service_obj_json = json.loads(service_obj)
-
-    service_old = service.load_from_json(service_old_json)
-    service_obj = service.load_from_json(service_obj_json)
+    service_old = service.load_from_json(json.loads(service_old))
+    service_updates = service.load_from_json(json.loads(service_updates))
+    service_obj = service.load_from_json(json.loads(service_obj))
 
     responders = []
     # update service with each provider present in provider_details
@@ -111,6 +107,7 @@ if __name__ == '__main__':
     parser.add_argument('project_id', action="store")
     parser.add_argument('service_id', action="store")
     parser.add_argument('service_old', action="store")
+    parser.add_argument('service_updates', action="store")
     parser.add_argument('service_obj', action="store")
 
     result = parser.parse_args()

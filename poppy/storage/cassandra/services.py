@@ -80,6 +80,7 @@ CQL_GET_SERVICE = '''
     WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 '''
 
+<<<<<<< HEAD
 CQL_VERIFY_DOMAIN = '''
     SELECT project_id,
         service_id,
@@ -95,6 +96,14 @@ CQL_CLAIM_DOMAIN = '''
     VALUES (%(domain_name)s,
         %(project_id)s,
         %(service_id)s)
+=======
+CQL_GET_SERVICE_BY_NAME = '''
+    SELECT project_id,
+        service_id,
+        service_name
+    FROM service_names
+    WHERE service_name = %(service_name)s
+>>>>>>> master
 '''
 
 CQL_ARCHIVE_SERVICE = '''
@@ -124,9 +133,14 @@ CQL_ARCHIVE_SERVICE = '''
         DELETE FROM services
         WHERE project_id = %(project_id)s AND service_id = %(service_id)s;
 
+<<<<<<< HEAD
         DELETE FROM domain_names
         WHERE domain_name IN %(domains_list)s
 
+=======
+        DELETE FROM service_names
+        WHERE service_name = %(service_name)s;
+>>>>>>> master
     APPLY BATCH;
     '''
 CQL_DELETE_SERVICE = '''
@@ -134,12 +148,18 @@ CQL_DELETE_SERVICE = '''
         DELETE FROM services
         WHERE project_id = %(project_id)s AND service_id = %(service_id)s
 
+<<<<<<< HEAD
         DELETE FROM domain_names
         WHERE domain_name IN %(domain_list)s
+=======
+        DELETE FROM service_names
+        WHERE service_name = %(service_name)s;
+>>>>>>> master
     APPLY BATCH
 '''
 
 CQL_CREATE_SERVICE = '''
+<<<<<<< HEAD
     INSERT INTO services (project_id,
         service_id,
         service_name,
@@ -159,6 +179,37 @@ CQL_CREATE_SERVICE = '''
         %(caching_rules)s,
         %(restrictions)s,
         %(provider_details)s)
+=======
+    BEGIN BATCH
+        INSERT INTO services (project_id,
+            service_id,
+            service_name,
+            flavor_id,
+            domains,
+            origins,
+            caching_rules,
+            restrictions,
+            provider_details
+            )
+        VALUES (%(project_id)s,
+            %(service_id)s,
+            %(service_name)s,
+            %(flavor_id)s,
+            %(domains)s,
+            %(origins)s,
+            %(caching_rules)s,
+            %(restrictions)s,
+            %(provider_details)s)
+
+        INSERT INTO service_names (service_name,
+            project_id,
+            service_id)
+        VALUES (%(service_name)s,
+            %(project_id)s,
+            %(service_id)s)
+    APPLY BATCH
+
+>>>>>>> master
 '''
 
 CQL_UPDATE_SERVICE = CQL_CREATE_SERVICE
@@ -262,6 +313,7 @@ class ServicesController(base.ServicesController):
 
         return self.format_result(result)
 
+<<<<<<< HEAD
     def _exists_elsewhere(self, domain_name, service_id):
         """_exists_elsewhere
 
@@ -288,6 +340,29 @@ class ServicesController(base.ServicesController):
                             .format(domain_name))
                         return True
                 return False
+=======
+    def _exists(self, service_name):
+        """_exists
+
+        Check if a service with this name has already been created.
+
+        :param service_name
+
+        :raises ValueError
+        :returns Boolean if the service exists.
+        """
+        try:
+            LOG.info("Check if service '{0}' exists".format(service_name))
+            args = {
+                'service_name': service_name
+            }
+            results = self.session.execute(CQL_GET_SERVICE_BY_NAME, args)
+
+            if results:
+                LOG.info(
+                    "Service '{0}' already exists.".format(service_name))
+                return True
+>>>>>>> master
             else:
                 return False
         except ValueError:
@@ -304,6 +379,7 @@ class ServicesController(base.ServicesController):
         :raises ValueError
         """
 
+<<<<<<< HEAD
         # check if the service domain names already exist
         for d in service_obj.domains:
             if self._exists_elsewhere(
@@ -311,6 +387,12 @@ class ServicesController(base.ServicesController):
                     service_obj.service_id) is True:
                 raise ValueError(
                     "Domain %s has already been taken" % d.domain)
+=======
+        # check if the service name already exists
+        if self._exists(service_obj.name) is True:
+            raise ValueError(
+                "Service %s has already been taken" % service_obj.name)
+>>>>>>> master
 
         # create the service in storage
         service_id = service_obj.service_id
@@ -325,7 +407,11 @@ class ServicesController(base.ServicesController):
                         for r in service_obj.restrictions]
 
         # create a new service
+<<<<<<< HEAD
         service_args = {
+=======
+        args = {
+>>>>>>> master
             'project_id': project_id,
             'service_id': uuid.UUID(service_id),
             'service_name': service_name,
@@ -339,6 +425,7 @@ class ServicesController(base.ServicesController):
 
         LOG.debug("Creating New Service - {0} ({1})".format(service_id,
                                                             service_name))
+<<<<<<< HEAD
         batch = query.BatchStatement()
         batch.add(query.SimpleStatement(CQL_CREATE_SERVICE), service_args)
 
@@ -361,6 +448,11 @@ class ServicesController(base.ServicesController):
                     service_id) is True:
                 raise ValueError(
                     "Domain {0} has already been taken".format(d.domain))
+=======
+        self.session.execute(CQL_CREATE_SERVICE, args)
+
+    def update(self, project_id, service_id, service_obj):
+>>>>>>> master
 
         service_name = service_obj.name
         domains = [json.dumps(d.to_dict())
@@ -403,9 +495,12 @@ class ServicesController(base.ServicesController):
         result = results[0]
 
         if (result):
+<<<<<<< HEAD
             domains_list = [json.loads(d).get('domain')
                             for d in result.get('domains')]
 
+=======
+>>>>>>> master
             if self._driver.archive_on_delete:
                 archive_args = {
                     'project_id': result.get('project_id'),
@@ -427,7 +522,11 @@ class ServicesController(base.ServicesController):
                 delete_args = {
                     'project_id': result.get('project_id'),
                     'service_id': result.get('service_id'),
+<<<<<<< HEAD
                     'domains_list': domains_list
+=======
+                    'service_name': result.get('service_name')
+>>>>>>> master
                 }
                 self.session.execute(CQL_DELETE_SERVICE, delete_args)
 

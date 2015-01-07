@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 import json
 import os
 import subprocess
@@ -32,6 +33,16 @@ from poppy.model import service
 from poppy.openstack.common import log
 from poppy.transport.validators.schemas import service as service_schema
 from poppy.transport.validators.stoplight import exceptions
+=======
+import copy
+import json
+import os
+import subprocess
+
+from poppy.common import errors
+from poppy.manager import base
+from poppy.openstack.common import log
+>>>>>>> master
 
 LOG = log.getLogger(__name__)
 
@@ -105,18 +116,26 @@ class DefaultServicesController(base.ServicesController):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    'service_async_workers',
                                    'create_service_worker.py')
+<<<<<<< HEAD
         if use_uwsgi:
             executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
         else:
             executable = sys.executable
         cmd_list = [executable,
+=======
+        cmd_list = ['python',
+>>>>>>> master
                     proxy_path,
                     script_path,
                     json.dumps(providers),
                     project_id, service_id,
                     json.dumps(service_obj.to_dict())]
         LOG.info('Starting create service subprocess: %s' % cmd_list)
+<<<<<<< HEAD
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
+=======
+        p = subprocess.Popen(cmd_list)
+>>>>>>> master
         p.communicate()
 
         return
@@ -134,6 +153,7 @@ class DefaultServicesController(base.ServicesController):
             raise errors.ServiceStatusNotDeployed(
                 u'Service {0} not deployed'.format(service_id))
 
+<<<<<<< HEAD
         service_old_dict = service_old.to_dict()
         service_obj_dict = jsonpatch.apply_patch(
             service_old_dict, service_updates)
@@ -161,6 +181,23 @@ class DefaultServicesController(base.ServicesController):
                 ])}
                 for error in errors_list])
             raise exceptions.ValidationFailed(json.dumps(details))
+=======
+        service_obj = copy.deepcopy(service_old)
+
+        # update service object
+        if service_updates.name:
+            raise Exception(u'Currently this operation is not supported')
+        if service_updates.domains:
+            service_obj.domains = service_updates.domains
+        if service_updates.origins:
+            service_obj.origins = service_updates.origins
+        if service_updates.caching:
+            raise Exception(u'Currently this operation is not supported')
+        if service_updates.restrictions:
+            raise Exception(u'Currently this operation is not supported')
+        if service_updates.flavor_id:
+            raise Exception(u'Currently this operation is not supported')
+>>>>>>> master
 
         # get provider details for this service
         provider_details = self._get_provider_details(project_id, service_id)
@@ -179,18 +216,29 @@ class DefaultServicesController(base.ServicesController):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    'service_async_workers',
                                    'update_service_worker.py')
+<<<<<<< HEAD
         if use_uwsgi:
             executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
         else:
             executable = sys.executable
         cmd_list = [executable,
+=======
+        cmd_list = ['python',
+>>>>>>> master
                     proxy_path,
                     script_path,
                     project_id, service_id,
                     json.dumps(service_old.to_dict()),
+<<<<<<< HEAD
                     json.dumps(service_obj.to_dict())]
         LOG.info('Starting update service subprocess: %s' % cmd_list)
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
+=======
+                    json.dumps(service_updates.to_dict()),
+                    json.dumps(service_obj.to_dict())]
+        LOG.info('Starting update service subprocess: %s' % cmd_list)
+        p = subprocess.Popen(cmd_list)
+>>>>>>> master
         p.communicate()
 
         return
@@ -221,18 +269,26 @@ class DefaultServicesController(base.ServicesController):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    'service_async_workers',
                                    'delete_service_worker.py')
+<<<<<<< HEAD
         if use_uwsgi:
             executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
         else:
             executable = sys.executable
         cmd_list = [executable,
+=======
+        cmd_list = ["python",
+>>>>>>> master
                     proxy_path,
                     script_path,
                     json.dumps(dict([(k, v.to_dict())
                                      for k, v in provider_details.items()])),
                     project_id, service_id]
         LOG.info('Starting delete service subprocess: %s' % cmd_list)
+<<<<<<< HEAD
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
+=======
+        p = subprocess.Popen(cmd_list)
+>>>>>>> master
         p.communicate()
 
         return
@@ -248,11 +304,15 @@ class DefaultServicesController(base.ServicesController):
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                    'service_async_workers',
                                    'purge_service_worker.py')
+<<<<<<< HEAD
         if use_uwsgi:
             executable = os.path.join(uwsgi.opt['virtualenv'], 'bin', 'python')
         else:
             executable = sys.executable
         cmd_list = [executable,
+=======
+        cmd_list = ["python",
+>>>>>>> master
                     proxy_path,
                     script_path,
                     json.dumps(dict([(k, v.to_dict())
@@ -261,7 +321,11 @@ class DefaultServicesController(base.ServicesController):
                     str(purge_url)]
 
         LOG.info('Starting purge service subprocess: %s' % cmd_list)
+<<<<<<< HEAD
         p = subprocess.Popen(cmd_list, env=os.environ.copy())
+=======
+        p = subprocess.Popen(cmd_list)
+>>>>>>> master
         p.communicate()
 
         return

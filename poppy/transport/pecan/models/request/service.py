@@ -38,7 +38,10 @@ def load_from_json(json_data):
     restrictions = [restriction.load_from_json(r) for r in restrictions]
 
     # convert caching rule json string list into object list
+<<<<<<< HEAD
     caching = json_data.get("caching", [])
+=======
+>>>>>>> master
     caching = [cachingrule.load_from_json(c) for c in caching]
 
     r = service.Service(service_id,

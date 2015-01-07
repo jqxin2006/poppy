@@ -52,14 +52,24 @@ links = {'type': 'object',
 
 error_message = {'type': 'object',
                  'properties': {
+<<<<<<< HEAD
                      'message': {'type': 'string'}},
                  'required': ['message'],
                  'additionalProperties': False}
+=======
+                     'message': {'type': 'string'}
+                 }
+                 }
+>>>>>>> master
 
 restrictions = {'type': 'array'}
 flavor_id = {'type': 'string', 'pattern': '([a-zA-Z0-9_\-]{1,256})'}
 service_name = {'type': 'string', 'pattern': '([a-zA-Z0-9_\-\.]{1,256})'}
+<<<<<<< HEAD
 uuid4 = '([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})'  # noqa
+=======
+uuid4 = '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'  # noqa
+>>>>>>> master
 service_id = {'type': 'string', 'pattern': uuid4}
 
 # Response Schema Definition for Get Service API

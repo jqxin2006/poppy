@@ -57,11 +57,18 @@ class Restriction(common.DictSerializableModel):
         :param dict_obj: dictionary object
         :returns o
         """
+<<<<<<< HEAD
 
         o = cls("unnamed")
         o.restriction = dict_obj.get("restriction", "unnamed")
         o.name = dict_obj.get("name", "unnamed")
         o.value = dict_obj.get("ssl", [])
+=======
+        o = cls(
+            dict_obj.get("name", "unnamed"),
+            dict_obj.get("rules", [])
+        )
+>>>>>>> master
         return o
 
     def to_dict(self):

@@ -108,7 +108,11 @@ class ServicesController(base.Controller, hooks.HookController):
             pecan.abort(400, detail=error)
 
         try:
+<<<<<<< HEAD
             if marker is not None:
+=======
+            if marker:
+>>>>>>> master
                 marker = str(uuid.UUID(marker))
         except ValueError:
             pecan.abort(400, detail="Marker must be a valid UUID")
@@ -203,7 +207,11 @@ class ServicesController(base.Controller, hooks.HookController):
             helpers.abort_with_message,
             stoplight_helpers.pecan_getter))
     def patch_one(self, service_id):
+<<<<<<< HEAD
         service_updates = json.loads(pecan.request.body.decode('utf-8'))
+=======
+        service_json_dict = json.loads(pecan.request.body.decode('utf-8'))
+>>>>>>> master
 
         # if service_updates is empty, abort
         if not service_updates:
@@ -214,8 +222,11 @@ class ServicesController(base.Controller, hooks.HookController):
         try:
             services_controller.update(
                 self.project_id, service_id, service_updates)
+<<<<<<< HEAD
         except exceptions.ValidationFailed as e:
             pecan.abort(400, detail=str(e))
+=======
+>>>>>>> master
         except ValueError as e:
             pecan.abort(404, detail='service could not be found')
         except errors.ServiceStatusNotDeployed as e:

@@ -34,11 +34,19 @@ schema_statements = [
     PRIMARY KEY (flavor_id)
     );
     ''',
+<<<<<<< HEAD
     '''CREATE TABLE domain_names (
     project_id VARCHAR,
     service_id UUID,
     domain_name VARCHAR,
     PRIMARY KEY (domain_name)
+=======
+    '''CREATE TABLE service_names (
+    project_id VARCHAR,
+    service_id UUID,
+    service_name VARCHAR,
+    PRIMARY KEY (service_name)
+>>>>>>> master
     );
     ''',
     '''CREATE TABLE archives (

@@ -77,12 +77,20 @@ class CachingRule(common.DictSerializableModel):
         :param dict_obj: dictionary object
         :returns o
         """
+<<<<<<< HEAD
 
         o = cls("unnamed", 3600)
         o.caching = dict_obj.get("caching", "unnamed")
         o.name = dict_obj.get("name", "unnamed")
         o.ttl = dict_obj.get("ttl", 3600)
         o.rules = dict_obj.get("rules", [])
+=======
+        o = cls(
+            dict_obj.get("name", "unnamed"),
+            dict_obj.get("ttl", 0),
+            dict_obj.get("rules", [])
+        )
+>>>>>>> master
         return o
 
     def to_dict(self):

@@ -29,6 +29,10 @@ class ServicesController(base.ServicesController):
         super(ServicesController, self).__init__(driver)
 
         self.created_service_ids = []
+<<<<<<< HEAD
+=======
+        self.created_service_names = []
+>>>>>>> master
 
     @property
     def session(self):
@@ -53,7 +57,11 @@ class ServicesController(base.ServicesController):
         services = []
         for i in self.created_service_ids:
             services = [{'service_id': i,
+<<<<<<< HEAD
                          'service_name': uuid.uuid4(),
+=======
+                         'name': i,
+>>>>>>> master
                          'domains': [json.dumps(
                              {'domain': 'www.mywebsite.com'})
                          ],
@@ -89,7 +97,11 @@ class ServicesController(base.ServicesController):
     def get(self, project_id, service_id):
         # get the requested service from storage
         if service_id not in self.created_service_ids:
+<<<<<<< HEAD
             raise ValueError("service {0} does not exist".format(service_id))
+=======
+            raise ValueError("service: % does not exist")
+>>>>>>> master
         else:
             origin_json = json.dumps({'origin': 'mywebsite.com',
                                       'port': 80,
@@ -114,7 +126,11 @@ class ServicesController(base.ServicesController):
                         [{'operator_url': 'mockcf123.fastly.prod.com'}]})}
 
             service_dict = {'service_id': service_id,
+<<<<<<< HEAD
                             'service_name': uuid.uuid4(),
+=======
+                            'name': service_id,
+>>>>>>> master
                             'domains': [domain_json],
                             'origins': [origin_json],
                             'flavor_id': 'standard',
@@ -142,10 +158,20 @@ class ServicesController(base.ServicesController):
         if service_obj.service_id in self.created_service_ids:
             raise ValueError("Service %s already exists." %
                              service_obj.service_id)
+<<<<<<< HEAD
 
         # TODO(amitgandhinz): append the entire service
         # instead of just the name
         self.created_service_ids.append(service_obj.service_id)
+=======
+        elif service_obj.name in self.created_service_names:
+            raise ValueError("Service %s already exists." % service_obj.name)
+        else:
+            # TODO(amitgandhinz): append the entire service
+            # instead of just the name
+            self.created_service_ids.append(service_obj.service_id)
+            self.created_service_names.append(service_obj.name)
+>>>>>>> master
 
     def update(self, project_id, service_id, service_json):
         # update configuration in storage
@@ -185,7 +211,11 @@ class ServicesController(base.ServicesController):
     @staticmethod
     def format_result(result):
         service_id = result.get('service_id')
+<<<<<<< HEAD
         name = str(result.get('service_name'))
+=======
+        name = result.get('service_name')
+>>>>>>> master
         origins = [json.loads(o) for o in result.get('origins', [])]
         domains = [json.loads(d) for d in result.get('domains', [])]
         origins = [origin.Origin(o['origin'],
