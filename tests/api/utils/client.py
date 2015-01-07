@@ -109,11 +109,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('PATCH', location, request_entity=request_object,
                             requestslib_kwargs=requestslib_kwargs)
 
-<<<<<<< HEAD
-    def get_service(self, location=None):
-=======
     def get_service(self, location=None, requestslib_kwargs=None):
->>>>>>> master
         """Get Service
 
         :return: Response Object containing response code 200 and body with
@@ -121,16 +117,10 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         GET
         services/{service_id}
         """
-<<<<<<< HEAD
-        return self.request('GET', location)
-
-    def list_services(self, param=None):
-=======
         return self.request('GET', location,
                             requestslib_kwargs=requestslib_kwargs)
 
     def list_services(self, param=None, requestslib_kwargs=None):
->>>>>>> master
         """Get a list of Services
 
         :return: Response Object containing response code 200 and body with
@@ -143,11 +133,7 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         return self.request('GET', url, params=param,
                             requestslib_kwargs=requestslib_kwargs)
 
-<<<<<<< HEAD
-    def delete_service(self, location):
-=======
     def delete_service(self, location, requestslib_kwargs=None):
->>>>>>> master
         """Delete Service
 
         :return: Response Object containing response code 204
@@ -155,12 +141,8 @@ class PoppyClient(client.AutoMarshallingHTTPClient):
         services/{service_id}
         """
 
-<<<<<<< HEAD
-        return self.request('DELETE', location)
-=======
         return self.request('DELETE', location,
                             requestslib_kwargs=requestslib_kwargs)
->>>>>>> master
 
     def check_health(self):
         """Check Health of the application

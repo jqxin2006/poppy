@@ -206,6 +206,39 @@ class TestPatchService(providers.TestProviderBase):
             resp = self.client.get_service(location=self.service_url)
             assert resp.status_code < 500
 
+    @attrib.attr('security1')
+    def test_patch_service_adding_origins_dos(self):
+        """
+        Create a service and add lots of origins.
+        """
+        for k in range(1, 100):
+            #create a service
+            self.domain_list = [{"domain":
+                                 "mywebsite%s.com" % str(uuid.uuid1())}]
+            resp = self.client.create_service(service_name=self.service_name,
+                                              domain_list=self.domain_list,
+                                              origin_list=self.origin_list,
+                                              caching_list=self.caching_list,
+                                              flavor_id=self.flavor_id)
+            if 'location' in resp.headers:
+                self.service_url = resp.headers['location']
+
+            test_data = []
+            for j in range(1, 60):
+                test_data.append(
+                    {"op": "add",
+                     "path": "/origins/%s" % j,
+                     "value": {"origin": "1.2.3.4", "port": 80, "ssl": false,
+                               "rules": [{"name": "origin",
+                                          "request_url": "/origin.htm"}]}})
+
+            resp = self.client.patch_service(location=self.service_url,
+                                             request_body=test_data)
+            if resp.status_code == 400:
+                continue
+            resp = self.client.get_service(location=self.service_url)
+            assert resp.status_code < 500
+
     def tearDown(self):
         if self.service_url != '':
             self.client.delete_service(location=self.service_url)
