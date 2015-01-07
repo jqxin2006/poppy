@@ -20,6 +20,7 @@ import ddt
 import re
 from nose.plugins import attrib
 from tests.api import providers
+import time
 
 
 @ddt.ddt
@@ -80,17 +81,17 @@ class TestPatchService(providers.TestProviderBase):
         self.service_name = str(uuid.uuid1())
         self.flavor_id = self.test_config.default_flavor
 
-    @attrib.attr('security')
+    @attrib.attr('security2')
     def test_patch_service_multiple_domains(self):
         """
         Check whether https is used for all links returned from get_service
         calls. If https is not used in any link, the test fails.
         """
-        for k in range(1, 200):
+        for k in range(1, 2000):
 
             domain_name = "replacemereplaceme%s.com" % str(uuid.uuid1())
             test_data = []
-            for j in range(1, 10):
+            for j in range(1, 2):
                 test_data.append(
                     {"op": "add",
                      "path": "/domains/-",
@@ -99,6 +100,7 @@ class TestPatchService(providers.TestProviderBase):
             resp = self.client.patch_service(location=self.service_url,
                                              request_body=test_data)
             assert resp.status_code == 202
+
             resp = self.client.get_service(location=self.service_url)
             assert resp.status_code == 200
 

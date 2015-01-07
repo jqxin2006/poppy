@@ -267,6 +267,41 @@ class TestAuthorizationService(providers.TestProviderBase):
             self.client.delete_service(location=self.service_url)
 
     @attrib.attr('security')
+    def test_authorization_patch_service_another_token(self):
+        """
+        Check whether it is possible to patch a service with
+        another user's valid token.
+        """
+        headers = {"X-Auth-Token": self.alt_user_client.auth_token,
+                   "X-Project-Id": self.client.project_id}
+        kwargs = {"headers": headers}
+        test_data = []
+        domain_name = "replacemereplaceme%s.com" % str(uuid.uuid1())
+        test_data.append({"op": "add",
+                          "path": "/domains/-",
+                          "value": {"domain": "%s" % (domain_name)}})
+        resp = self.client.create_service(service_name=self.service_name,
+                                          domain_list=self.domain_list,
+                                          origin_list=self.origin_list,
+                                          caching_list=self.caching_list,
+                                          flavor_id=self.flavor_id)
+        self.assertTrue(resp.status_code == 202)
+
+        if 'location' in resp.headers:
+            self.service_url = resp.headers['location']
+        else:
+            self.service_url = ''
+
+        if self.service_url != '':
+            resp = self.client.patch_service(location=self.service_url,
+                                             request_body=test_data,
+                                             requestslib_kwargs=kwargs)
+        self.assertTrue(resp.status_code == 401)
+        if self.service_url != '':
+            self.client.delete_service(location=self.service_url)
+
+
+    @attrib.attr('security')
     def test_authorization_delete_service_other_user_token(self):
         """
         Check whether it is possible to delete one service with a
